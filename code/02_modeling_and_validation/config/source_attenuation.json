@@ -1,0 +1,164 @@
+{
+  "evidence": {
+    "citation": "Cai, Zhang and Ying (2025), ACS ES&T Water 5, 920-933, https://doi.org/10.1021/acsestwater.4c00933",
+    "usage_data_file": "../../../data/reference/source_transition/cai_2025_table_s8_usage.csv",
+    "compound_mapping_file": "../../../data/reference/source_transition/cai_2025_gdr_mapping.csv",
+    "release_factor_file": "../../../data/reference/source_transition/cai_2025_application_release_factors.csv",
+    "multiplier_basis": "industrial_use_mass_ratio",
+    "geography": "China",
+    "reference_year": 2015,
+    "comparison_year": 2022,
+    "source_table": "Supporting Information Table S8",
+    "units": "t",
+    "source_boundary_translation": "For each GDR group, the 2022/2015 industrial-use mass ratio is applied as a dimensionless multiplier to the 2018 riverine source inventory. This assumes that the group-level relationship between industrial use and riverine release is stable over the comparison interval.",
+    "translation_limit": "The primary multiplier is a use-based source proxy, not an absolute emission estimate or a calendar-year forecast. Application-weighted water releases are calculated only for applications with an explicitly reported water release fraction and are retained as an incomplete diagnostic."
+  },
+  "scenarios": [
+    {
+      "scenario_id": "reference",
+      "analysis_role": "baseline",
+      "claim_scope": "Unperturbed 2018 source boundary.",
+      "legacy_mode": "reference",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "synchronized_legacy_control",
+      "analysis_role": "negative_control",
+      "claim_scope": "Common long-chain attenuation control; it must preserve the long-chain PFSA/PFCA source ratio.",
+      "transition_intensity": 1.0,
+      "legacy_mode": "synchronized",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "synchronized_legacy_control_10pct",
+      "analysis_role": "matched_negative_control",
+      "claim_scope": "Ten percent of the synchronized log-multiplier path, matched to the class-resolved gradient.",
+      "transition_intensity": 0.1,
+      "legacy_mode": "synchronized",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "synchronized_legacy_control_25pct",
+      "analysis_role": "matched_negative_control",
+      "claim_scope": "Twenty-five percent of the synchronized log-multiplier path, matched to the class-resolved gradient.",
+      "transition_intensity": 0.25,
+      "legacy_mode": "synchronized",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "synchronized_legacy_control_50pct",
+      "analysis_role": "matched_negative_control",
+      "claim_scope": "Fifty percent of the synchronized log-multiplier path, matched to the class-resolved gradient.",
+      "transition_intensity": 0.5,
+      "legacy_mode": "synchronized",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "synchronized_legacy_control_75pct",
+      "analysis_role": "matched_negative_control",
+      "claim_scope": "Seventy-five percent of the synchronized log-multiplier path, matched to the class-resolved gradient.",
+      "transition_intensity": 0.75,
+      "legacy_mode": "synchronized",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_legacy_control_10pct",
+      "analysis_role": "transition_gradient_sensitivity",
+      "claim_scope": "Ten percent of the log-multiplier path toward the observed class-resolved legacy transition; not a date or probability.",
+      "transition_intensity": 0.1,
+      "legacy_mode": "class_resolved",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_legacy_control_25pct",
+      "analysis_role": "transition_gradient_sensitivity",
+      "claim_scope": "Twenty-five percent of the log-multiplier path toward the observed class-resolved legacy transition; not a date or probability.",
+      "transition_intensity": 0.25,
+      "legacy_mode": "class_resolved",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_legacy_control_50pct",
+      "analysis_role": "transition_gradient_sensitivity",
+      "claim_scope": "Fifty percent of the log-multiplier path toward the observed class-resolved legacy transition; not a date or probability.",
+      "transition_intensity": 0.5,
+      "legacy_mode": "class_resolved",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_legacy_control_75pct",
+      "analysis_role": "transition_gradient_sensitivity",
+      "claim_scope": "Seventy-five percent of the log-multiplier path toward the observed class-resolved legacy transition; not a date or probability.",
+      "transition_intensity": 0.75,
+      "legacy_mode": "class_resolved",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_legacy_control",
+      "analysis_role": "primary_source_transition",
+      "claim_scope": "Observed 2015-2022 class-resolved industrial-use transition transferred as a dimensionless source-boundary perturbation.",
+      "transition_intensity": 1.0,
+      "legacy_mode": "class_resolved",
+      "short_mode": "reference"
+    },
+    {
+      "scenario_id": "class_resolved_substitution",
+      "analysis_role": "bounded_substitution_stress_test",
+      "claim_scope": "Observed short-chain substitution combined with class-resolved legacy attenuation; not a calendar-year forecast.",
+      "legacy_mode": "class_resolved",
+      "short_mode": "observed_transition"
+    },
+    {
+      "scenario_id": "post_plateau_common_control",
+      "analysis_role": "policy_extension_sensitivity",
+      "claim_scope": "Hypothetical post-plateau common control of short-chain alternatives; no timing is assigned.",
+      "legacy_mode": "class_resolved",
+      "short_mode": "post_plateau_common"
+    },
+    {
+      "scenario_id": "post_plateau_class_resolved_control",
+      "analysis_role": "policy_extension_sensitivity",
+      "claim_scope": "Hypothetical post-plateau class-resolved control of short-chain alternatives; no timing is assigned.",
+      "legacy_mode": "class_resolved",
+      "short_mode": "post_plateau_class_resolved"
+    }
+  ],
+  "contrasts": [
+    {
+      "contrast_id": "class_specific_legacy_10pct",
+      "scenario_id": "class_resolved_legacy_control_10pct",
+      "comparator_id": "synchronized_legacy_control_10pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 10% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_25pct",
+      "scenario_id": "class_resolved_legacy_control_25pct",
+      "comparator_id": "synchronized_legacy_control_25pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 25% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_50pct",
+      "scenario_id": "class_resolved_legacy_control_50pct",
+      "comparator_id": "synchronized_legacy_control_50pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 50% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_75pct",
+      "scenario_id": "class_resolved_legacy_control_75pct",
+      "comparator_id": "synchronized_legacy_control_75pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 75% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_100pct",
+      "scenario_id": "class_resolved_legacy_control",
+      "comparator_id": "synchronized_legacy_control",
+      "claim_scope": "Full-endpoint class-specific increment; retained as an out-of-domain stress contrast."
+    },
+    {
+      "contrast_id": "short_chain_substitution_increment",
+      "scenario_id": "class_resolved_substitution",
+      "comparator_id": "class_resolved_legacy_control",
+      "claim_scope": "Increment associated with the observed short-chain substitution stress on top of class-resolved legacy attenuation."
+    }
+  ]
+}

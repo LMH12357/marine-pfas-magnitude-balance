@@ -1,0 +1,66 @@
+{
+  "version": "v6.1",
+  "model_package_schema": "pfas-long-chain-magnitude-balance-model-package/v2",
+  "training_code_sha256": "60189ded342a5f22ad775ff83343a69b7be5f26b2474cbae2faa94278794b1ca",
+  "primary_targets": [
+    "Long_Magnitude",
+    "Long_Balance"
+  ],
+  "target_roles": {
+    "Long_Magnitude": "abundance_primary",
+    "Long_Balance": "fractionation_primary"
+  },
+  "data_path": "data/raw/DATA.xlsx",
+  "feature_table": "data/fixed_inputs/model/Long_Chain_Model_Feature_Table.csv",
+  "training_input_provenance": {
+    "feature_table": {
+      "path": "data/fixed_inputs/model/Long_Chain_Model_Feature_Table.csv",
+      "sha256": "0057c51827e31e01745ffec19141b48ccd1c2f1332df8219b40a2fc3a7be267d"
+    },
+    "sea_region_reference": {
+      "path": "data/reference/geospatial/china_marginal_sea_regions.geojson",
+      "sha256": "394edbf053f713b2c503846dd30478bc66d1b5dac7000ea3f5f42c0832352ba2"
+    }
+  },
+  "rows": 789,
+  "eligible_rows": 789,
+  "covariates": [
+    "Temperature (\u00b0C)",
+    "Salinity (\u2030)",
+    "Chla",
+    "POC (mg/m3)",
+    "TOC (%)",
+    "pH",
+    "SPM",
+    "DO",
+    "Hydro_Bottom_U",
+    "Hydro_Bottom_V",
+    "Hydro_MLD",
+    "Diffused_Total_Legacy_Force",
+    "Mixed_Source_Ratio_SC_LC",
+    "Mixed_Source_Ratio_LC_PFSA_PFCA",
+    "Mixed_Source_Ratio_SC_PFSA_PFCA"
+  ],
+  "feature_blocks": [
+    "all",
+    "environment",
+    "source"
+  ],
+  "validations": [
+    "sampling_group",
+    "spatial_block_stratified",
+    "leave_one_sampling_group_out",
+    "leave_one_sea_region_out"
+  ],
+  "primary_validation": "sampling_group",
+  "outer_folds": 5,
+  "inner_folds": 5,
+  "spatial_block_degrees": 2.0,
+  "interval_alpha": 0.05,
+  "seed": 42,
+  "bootstrap_iterations": 1000,
+  "shap_interactions": true,
+  "skip_final_models": false,
+  "exclude_sea_boundary_qa": false,
+  "quick": false
+}

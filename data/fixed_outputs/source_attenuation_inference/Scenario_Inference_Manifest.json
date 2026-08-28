@@ -1,0 +1,132 @@
+{
+  "script_version": "v6.1",
+  "analysis_label": "Ceteris-paribus source-boundary perturbation",
+  "claim_scope": "Dimensionless source-boundary experiments; not calendar-year forecasts or causal effects.",
+  "model_package": "data/fixed_outputs/primary_model/Long_Chain_Magnitude_Balance_Model_Package.pkl",
+  "model_package_sha256": "7407a8d046eafc4f52c96c416b8d723d5368c6f3dcaa7ff058387ff4f2b640b4",
+  "model_schema": "pfas-long-chain-magnitude-balance-model-package/v2",
+  "training_code_sha256": "60189ded342a5f22ad775ff83343a69b7be5f26b2474cbae2faa94278794b1ca",
+  "source_manifest": "data/fixed_outputs/source_attenuation_boundary/Legacy_Class_Transition_Manifest.json",
+  "source_manifest_sha256": "eab25ed4c236a75184ce104e8674a308f40bd2fd4aae821f1329db32c027960c",
+  "source_evidence": "Observed 2015-2022 Chinese group-level industrial-use mass ratios are transferred to the 2018 riverine source boundary under a stable use-to-river-release proportionality assumption. Outputs are counterfactual perturbations, not absolute emission estimates or calendar-year forecasts. Application-weighted water releases exclude textile and pharmaceutical-intermediate use because their reported release factors are not allocated to water; those estimates are diagnostic only.",
+  "boundary": "data/reference/geospatial/china_coastline_boundary.shp",
+  "boundary_sha256": "51d43b5c2f50e0bf3a833d445384ec752b1371782dde89c51c72b75404f1d244",
+  "coordinate_expected_values": {
+    "Long_Magnitude": 0.3863499467777821,
+    "Long_Balance": -1.6527218110999917
+  },
+  "fixed_environmental_features": [
+    "Temperature (°C)",
+    "Salinity (‰)",
+    "Chla",
+    "POC (mg/m3)",
+    "TOC (%)",
+    "pH",
+    "SPM",
+    "DO",
+    "Hydro_Bottom_U",
+    "Hydro_Bottom_V",
+    "Hydro_MLD"
+  ],
+  "perturbed_source_features": [
+    "Diffused_Total_Legacy_Force",
+    "Mixed_Source_Ratio_SC_LC",
+    "Mixed_Source_Ratio_LC_PFSA_PFCA",
+    "Mixed_Source_Ratio_SC_PFSA_PFCA"
+  ],
+  "shap_scope": "Paired attribution under one fixed fitted model and one fixed tree baseline; not a causal decomposition.",
+  "nonlinear_output_limit": "SHAP is not linearly reconstructed for Log_Long_Total or Long_Total.",
+  "paired_summary_uncertainty": "95% intervals from 1000 sampling-group-cluster bootstrap resamples; these quantify sampling heterogeneity of paired model responses, not total model or scenario uncertainty.",
+  "matched_contrasts": [
+    {
+      "contrast_id": "class_specific_legacy_10pct",
+      "scenario_id": "class_resolved_legacy_control_10pct",
+      "comparator_id": "synchronized_legacy_control_10pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 10% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_25pct",
+      "scenario_id": "class_resolved_legacy_control_25pct",
+      "comparator_id": "synchronized_legacy_control_25pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 25% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_50pct",
+      "scenario_id": "class_resolved_legacy_control_50pct",
+      "comparator_id": "synchronized_legacy_control_50pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 50% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_75pct",
+      "scenario_id": "class_resolved_legacy_control_75pct",
+      "comparator_id": "synchronized_legacy_control_75pct",
+      "claim_scope": "Increment attributable to class-resolved rather than synchronized long-chain attenuation at 75% path intensity."
+    },
+    {
+      "contrast_id": "class_specific_legacy_100pct",
+      "scenario_id": "class_resolved_legacy_control",
+      "comparator_id": "synchronized_legacy_control",
+      "claim_scope": "Full-endpoint class-specific increment; retained as an out-of-domain stress contrast."
+    },
+    {
+      "contrast_id": "short_chain_substitution_increment",
+      "scenario_id": "class_resolved_substitution",
+      "comparator_id": "class_resolved_legacy_control",
+      "claim_scope": "Increment associated with the observed short-chain substitution stress on top of class-resolved legacy attenuation."
+    }
+  ],
+  "products": {
+    "predictions": {
+      "file": "Scenario_Paired_Predictions.csv",
+      "sha256": "5b45aededaa483e48953751a622d5aa3d9b2edee6a04f07a59b1a9f7bff33b54"
+    },
+    "shap_values": {
+      "file": "Scenario_Paired_SHAP.csv",
+      "sha256": "c466331c194e6d60646985fcc4b6e3faade46cffcc904409f9b88b1bc6675aec"
+    },
+    "prediction_summary": {
+      "file": "Scenario_Prediction_Summary.csv",
+      "sha256": "2d5549e13c56928cb41770e1f013e2d338c18395b5645879e4861d38288c6b4d"
+    },
+    "shap_feature_summary": {
+      "file": "Scenario_SHAP_Feature_Summary.csv",
+      "sha256": "9df4d3b880a0295c40666d364ba3ed0872932a330de118306323902b6a6552da"
+    },
+    "shap_category_summary": {
+      "file": "Scenario_SHAP_Category_Summary.csv",
+      "sha256": "209e241e99c19dfbedee600564fd34304090119b7d857741d44d2744fd7f1bec"
+    },
+    "domain_summary": {
+      "file": "Scenario_Domain_Summary.csv",
+      "sha256": "bf6e83f60637386356c3304363f3a6b359b2830b93f1f3e228d8eed4e3f94519"
+    },
+    "domain_by_feature": {
+      "file": "Scenario_Domain_By_Feature.csv",
+      "sha256": "a966c49d88e2c7fb0576304d361baaeb91cbcda736cb761db81786ea898ad866"
+    },
+    "anchor_audit": {
+      "file": "Scenario_Baseline_Anchor_Audit.csv",
+      "sha256": "12dfda768f0666c440a3593064ff48a1347f39cb582ce6d7a849d9fa430a4d57"
+    },
+    "contrast_predictions": {
+      "file": "Scenario_Contrast_Predictions.csv",
+      "sha256": "503eb83534b0b28ff74934f5ccac1a1fccb4b5002edc82d46f9771848da72123"
+    },
+    "contrast_prediction_summary": {
+      "file": "Scenario_Contrast_Prediction_Summary.csv",
+      "sha256": "01bab78a631ad25496e2f1fadd28db45c247f228ae33e78b398399ff6e64cf87"
+    },
+    "contrast_shap": {
+      "file": "Scenario_Contrast_SHAP.csv",
+      "sha256": "ace2e7accc890497005c794d58a4f35fedc1ce117834e05bb1d4c3a6eb4aefcb"
+    },
+    "contrast_shap_feature_summary": {
+      "file": "Scenario_Contrast_SHAP_Feature_Summary.csv",
+      "sha256": "f6c7d613efa2ba1e9f4b010d907d1ee050bc03ff6d0e428cb7d8f9da8560724c"
+    },
+    "contrast_shap_category_summary": {
+      "file": "Scenario_Contrast_SHAP_Category_Summary.csv",
+      "sha256": "179f5e390156ec2c6a934a2c1116a30258a617278033a668dad54694f246f064"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+compound,gdr_group,acid_class,chain_class
+PFOS,Long_PFSA,PFSA,Long
+PFHxS,Long_PFSA,PFSA,Long
+PFHpS,Long_PFSA,PFSA,Long
+PFOA,Long_PFCA,PFCA,Long
+PFNA,Long_PFCA,PFCA,Long
+PFDA,Long_PFCA,PFCA,Long
+PFBS,Short_PFSA,PFSA,Short
+PFBA,Short_PFCA,PFCA,Short
+PFHxA,Short_PFCA,PFCA,Short
+PFHpA,Short_PFCA,PFCA,Short

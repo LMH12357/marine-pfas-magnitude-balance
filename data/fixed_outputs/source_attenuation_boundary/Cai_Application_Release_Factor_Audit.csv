@@ -1,0 +1,7 @@
+﻿application,application_name,total_environment_release_fraction,water_release_fraction_of_use,water_factor_status,source_basis
+OCPSF,"Organic chemicals, plastics, and synthetic fibers",0.5,0.35,explicit,50% released; approximately 70% of released mass enters water
+MF,Metal finishing,0.26,0.05,explicit,"16% to air, 5% to water, and 5% to land soil; 62% decomposed"
+AFFFs,Aqueous fire-fighting foams,,0.02,explicit,2% to water and 0.1% to air
+Txl,Textile,0.014,,unallocated,1.4% emission factor; environmental compartment not stated
+PI,Pharmaceutical intermediates,0.077,,unallocated,7.7% lost during use or transfer; environmental compartment not stated
+PPP,"Pulp, paper, and paperboard",0.04,0.01,explicit,1% primarily to wastewater and 3% to solid waste
