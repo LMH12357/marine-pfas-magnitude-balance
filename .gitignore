@@ -1,0 +1,10 @@
+# Generated results and local test caches are not public fixed reference inputs.
+outputs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Author-supplied raw workbooks are handled by the manuscript's data-sharing plan.
+data/raw/*.xlsx
+data/raw/*.xls

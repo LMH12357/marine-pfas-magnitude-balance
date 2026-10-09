@@ -1,0 +1,3 @@
+# Integrity manifests refer to exact file bytes, including numerical CSVs.
+# Do not rewrite line endings during checkout or staging.
+* -text

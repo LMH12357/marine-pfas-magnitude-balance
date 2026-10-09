@@ -1,0 +1,23 @@
+{
+  "analysis": "pooled_out_of_fold_group_ratio_sensitivity",
+  "output": "Sensitivity_Pooled_OOF_Performance.csv",
+  "output_rows": 30,
+  "output_sha256": "44854822bfb9209966ac380b95f4a198210de06dd75b136a9530913ed8d1fde7",
+  "inputs": [
+    {
+      "filename": "Reviewer_Out_of_Fold_Predictions.csv",
+      "sha256": "281ba1a6b4005dbde02ef6db1b06540e8650694b6a16c6e36aad36aeea037a9a"
+    }
+  ],
+  "historical_reference": {
+    "filename": "Reviewer_Pooled_OOF_Performance.csv",
+    "sha256": "44854822bfb9209966ac380b95f4a198210de06dd75b136a9530913ed8d1fde7",
+    "correspondence": "Table S5",
+    "byte_identical_to_recomputed_export": true
+  },
+  "calculation": "Existing original-scale held-out observations and predictions pooled by target, scheme, model and validation; no model fitting, clipping, filtering or reweighting.",
+  "group_ratio_scale": "untransformed",
+  "primary_Magnitude_Balance_model": false,
+  "model_refitted": false,
+  "existing_fold_mean_summary_replaced": false
+}

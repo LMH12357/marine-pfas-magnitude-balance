@@ -677,6 +677,39 @@ def summarize_performance(per_fold: pd.DataFrame):
     return summary, pd.DataFrame(delta_rows)
 
 
+def summarize_pooled_oof_performance(predictions: pd.DataFrame) -> pd.DataFrame:
+    """Compute pooled held-out metrics on the untransformed group-ratio scale."""
+    grouping = ["target", "scheme", "model", "validation"]
+    missing = sorted(set(grouping + ["observed", "predicted"]).difference(predictions.columns))
+    if missing:
+        raise ValueError(f"Missing pooled OOF columns: {missing}")
+
+    rows = []
+    for keys, group in predictions.groupby(grouping, sort=True):
+        observed = group["observed"].to_numpy(dtype=float)
+        predicted = group["predicted"].to_numpy(dtype=float)
+        if not np.isfinite(observed).all() or not np.isfinite(predicted).all():
+            raise ValueError(f"Non-finite pooled OOF values for {keys}")
+        rows.append({
+            **dict(zip(grouping, keys)),
+            "N": len(group),
+            **regression_metrics(observed, predicted),
+        })
+
+    pooled = pd.DataFrame(rows, columns=grouping + ["N", "R2", "MSE", "RMSE", "MAE"])
+    if pooled.empty:
+        return pooled.assign(Delta_R2=np.nan, Delta_RMSE=np.nan)
+    reference = pooled[pooled["scheme"] == "S0_submitted"].set_index(
+        ["target", "model", "validation"]
+    )
+    for metric in ("R2", "RMSE"):
+        pooled[f"Delta_{metric}"] = [
+            row[metric] - reference.loc[(row["target"], row["model"], row["validation"]), metric]
+            for _, row in pooled.iterrows()
+        ]
+    return pooled
+
+
 def ratio_stability(targets_by_scheme: dict[str, pd.DataFrame]):
     rows = []
     primary = targets_by_scheme["S0_submitted"]
@@ -815,6 +848,8 @@ def main():
             summary.to_csv(arguments.output_dir / "Sensitivity_Performance_Summary.csv", index=False)
             deltas.to_csv(arguments.output_dir / "Sensitivity_Performance_Deltas.csv", index=False)
             predictions.to_csv(arguments.output_dir / "Sensitivity_Out_of_Fold_Predictions.csv", index=False)
+            pooled = summarize_pooled_oof_performance(predictions)
+            pooled.to_csv(arguments.output_dir / "Sensitivity_Pooled_OOF_Performance.csv", index=False)
 
     (arguments.output_dir / "Run_Manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 

@@ -1,0 +1,79 @@
+{
+  "archive_kind": "existing_fixed_model_postprocessing_outputs",
+  "archived_on": "2026-10-09",
+  "new_model_execution": false,
+  "purpose": "Archive the already verified quantitative source tables underlying Figure S3 and the class-specific/within-group attribution results in Results 3.5. No images or large observation-level intermediates are bundled here.",
+  "recovered_from": "outputs/WR_evidence_strengthening_20261007 in the research working archive",
+  "files": [
+    {
+      "path": "regional_class_response_summary.csv",
+      "bytes": 82218,
+      "sha256": "ea92f92738371cf5bbae917c0c345520d3fbcdab5088a4afe2edfda1863c565a",
+      "rows": 360,
+      "maps_to": ["Figure S3a", "Results 3.5 class-specific concentration changes"]
+    },
+    {
+      "path": "within_group_attribution_contrasts.csv",
+      "bytes": 6476,
+      "sha256": "68f6ab6a3f4499789a7c620cf2000785cfd4f9a480c7cda625618499c37ebfeb",
+      "rows": 40,
+      "maps_to": ["Figure S3b", "Results 3.5 TOC/MLD attribution contrasts"]
+    },
+    {
+      "path": "analysis_manifest.json",
+      "bytes": 1122,
+      "sha256": "c72c20560ea908da40e9b832b7e14f8e94e732bb5bfe956e6bf4bc08553eabfe",
+      "role": "Unchanged historical post-processing manifest; not a new execution record."
+    }
+  ],
+  "original_analysis_scripts": [
+    {"name": "wr_evidence_strengthening.py", "sha256": "9de4c6ddb2d0949b2d43e6cbf809bd60fe150157a976602bb7f07eb37536cc2f"},
+    {"name": "wr_response_regimes.py", "sha256": "8fa08faee4f61eecb507319b328bb7f983b778ea32a30176f42845e1bc73fd5a"}
+  ],
+  "historical_large_input_identities": {
+    "Scenario_Paired_Predictions.csv": "5b45aededaa483e48953751a622d5aa3d9b2edee6a04f07a59b1a9f7bff33b54",
+    "Nested_OOF_SHAP_Values.csv": "f601d40d4aea6ef2252e767e2fab72b0dc0a85a74f3fea2eff6771faae6b1d39",
+    "origin": "Input hashes recorded by the unchanged historical analysis_manifest.json; these large inputs are not copied in this compact output archive."
+  },
+  "figure_panel_selectors": {
+    "a": {
+      "file": "regional_class_response_summary.csv",
+      "filters": {"scope": "fixed_all_paths", "path_pct": 50, "component": ["PFSA", "PFCA"], "sea": ["Bohai Sea", "Yellow Sea", "East China Sea", "South China Sea"], "path": ["class_resolved", "synchronized"]},
+      "selected_rows": 16,
+      "point": "geometric_change_pct",
+      "interval": ["ci_low_pct", "ci_high_pct"]
+    },
+    "b": {
+      "file": "within_group_attribution_contrasts.csv",
+      "filters": {"attribution": "original", "validation": ["sampling_group", "spatial_block_stratified"], "target_feature_pairs": [["Long_Magnitude", "TOC (%)"], ["Long_Magnitude", "Hydro_MLD"], ["Long_Balance", "Hydro_MLD"]]},
+      "selected_rows": 6,
+      "point": "mean_high_minus_low",
+      "interval": ["ci_low", "ci_high"]
+    }
+  },
+  "methods": {
+    "fixed_common_support": "714 observations from 21 sampling groups, with all four source predictors within their respective training marginal min-max ranges under both attenuation paths at all 10,25,50 percent path positions.",
+    "path_position": "Fraction of the specified logarithmic path toward its endpoint; not the fraction of emissions removed or elapsed calendar time.",
+    "regional_estimate": "Mean paired log-concentration change over retained observations, transformed as 100*expm1(mean_log_change). Regional points are observation-weighted, not sampling-group-equal.",
+    "regional_bootstrap": "10000 whole-sampling-group resamples retaining the within-group observations and baseline-scenario pairs, conditional on the fixed models and source inventory.",
+    "quartile_estimate": "Within each sampling group represented in both pooled full-feature-distribution quartile bands, mean upper-band OOF SHAP minus mean lower-band OOF SHAP; equal weight over eligible sampling groups.",
+    "quartile_bands": {"TOC_percent_low_max": 0.342958609459001, "TOC_percent_high_min": 0.6590785921149608, "MLD_m_low_max": 7.92956018447876, "MLD_m_high_min": 11.44444160163403},
+    "eligible_quartile_groups": {"TOC": 9, "MLD": 8},
+    "quartile_bootstrap": "10000 resamples of the eligible group-level contrasts. Archived intervals preserve the historical RNG/computation stream, without rerunning or resetting it here.",
+    "interval_type": "Pointwise 95 percent percentile bootstrap intervals; not multiplicity-adjusted tests or complete model-estimation uncertainty."
+  },
+  "boundaries": [
+    "The complete compact summary files include sensitivity scopes/contrasts beyond the rows selected for Figure S3. The selectors above identify the reported panels exactly.",
+    "No exploratory attribution-knot/turning-point file, fitted threshold claim, raw XLSX, large observation-level CSV or figure image has been copied.",
+    "Quartile bands are descriptive feature-distribution bands, not physical release thresholds. SHAP contrasts are on the original Magnitude/Balance scales, not measured concentration changes or interfacial fluxes.",
+    "Regional group counts may overlap across sea regions and are not summed as independent groups.",
+    "No model retraining, primary SHAP recomputation or new bootstrap was performed during archival packaging.",
+    "New source-ratio diagnostic outputs, if added separately, are distinct from this reported-S3 archival record."
+  ],
+  "checks": {
+    "byte_identical_to_archived_tables": true,
+    "figure_a_rows": 16,
+    "figure_b_rows": 6,
+    "reported_class_values_and_TOC_MLD_contrasts_match": true
+  }
+}

@@ -4,6 +4,15 @@ Analysis code and fixed numerical inputs for examining marine PFAS concentration
 
 This repository reproduces data preparation, model validation, source-boundary perturbation and numerical results. It intentionally excludes figure-layout and image-export code. Figures are presentation products; the calculations underlying their values are performed and exported by the analysis scripts included here.
 
+## Analysis update
+
+This revision extends the reproducible analysis at commit
+`e0347a58d535f6bb56cc2a072aaa22b203dcaacd` with fixed-model evidence
+post-processing, pooled sensitivity exports and compact numerical references.
+The historical execution manifests are retained with their original identities;
+new calculations have separate provenance records. The primary RF/XGB models,
+historical Monte Carlo inputs and reported numerical results are unchanged.
+
 ## Repository structure
 
 ```text
@@ -12,6 +21,7 @@ code/
     01_environmental_covariates/
     02_source_covariates/
   02_modeling_and_validation/
+  03_evidence_strengthening/
 data/
   fixed_inputs/
   reference/
@@ -62,7 +72,48 @@ python code/02_modeling_and_validation/05_compositional_validation.py
 python code/02_modeling_and_validation/06_magnitude_balance_validation.py
 ```
 
-The first command requires `data/raw/DATA.xlsx` because it reconstructs censoring treatments from the workbook. The other two use the fixed model feature table by default.
+The first command requires `data/raw/DATA.xlsx` because it reconstructs censoring
+treatments from the workbook. The compositional-validation command (05) also
+requires that workbook to reconstruct its group targets and supplements its
+predictors from the fixed model feature table. Only command 06 can use the fixed
+feature table without first reading the raw workbook.
+
+Command 04 now additionally writes `Sensitivity_Pooled_OOF_Performance.csv`
+from its already generated held-out predictions. This evaluates original,
+untransformed group ratios and is distinct from the existing per-fold mean
+summary in `Sensitivity_Performance_Summary.csv`; neither summary replaces the
+other. The pooled export does not refit or modify observations or predictions.
+
+### 6. Existing-output evidence post-processing
+
+```bash
+python code/03_evidence_strengthening/wr_evidence_strengthening.py \
+  --scenario-input outputs/03_source_attenuation_inference/Scenario_Paired_Predictions.csv \
+  --shap-input outputs/01_primary_model/Nested_OOF_SHAP_Values.csv
+python code/03_evidence_strengthening/wr_response_regimes.py
+python code/03_evidence_strengthening/source_ratio_diagnostic.py
+```
+
+The historical `wr_` script names are retained for traceability. The first two
+scripts reproduce fixed-common-domain
+regional class responses and within-sampling-group TOC/mixed-layer-depth
+quartile attribution contrasts, with the original 10,000-resample bootstrap
+sequence. Exploratory knot diagnostics remain explicitly separate from the
+reported contrasts and are not interpreted as physical thresholds.
+
+The third script summarizes mixed-source long-chain PFSA/PFCA descriptors from
+the existing paired feature exports. Its common domain requires all four source
+features to remain within training minima/maxima in both designs at 10%, 25%
+and 50% path positions. Fixed source-node ratios do not imply fixed mixed-source
+descriptors, because attenuation can change relative total-load weights. The
+diagnostic is not an isolated test of environmental causality or sediment flux.
+
+The compact reference package does not contain the large, complete paired
+prediction and OOF SHAP files. Use existing archived files through the explicit
+input arguments, or first generate them with commands 01/03. None of the new
+post-processing scripts silently retrains a model or recalculates SHAP when
+inputs are missing. See `code/03_evidence_strengthening/README.md` for individual
+inputs, outputs and provenance.
 
 ## Path configuration
 
@@ -86,6 +137,14 @@ The manuscript's river-flux reconstruction used 1,000 Monte Carlo draws per sour
 ## Fixed outputs
 
 `data/fixed_outputs/` contains compact reference outputs for numerical cross-checking, including model performance, feature-block/SHAP summaries, source-transition products, the back-transformed burden summary and validation summaries. It does not contain submission figures or figure-export code.
+
+The new `Compositional_AllDesigns_Canonical_*` tables recover three-design
+canonical figure-source summaries without relabeling the original spatial-only
+execution manifest. Their source manifest states precision and field-coverage
+boundaries. The `evidence_strengthening/` compact tables retain the reported
+regional and attribution-contrast results and identify which rows support the
+manuscript figure, rather than treating every exploratory result as a reported
+finding.
 
 ## Verification
 

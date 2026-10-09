@@ -1,0 +1,33 @@
+{
+  "analysis": "mixed_source_long_chain_ratio_diagnostic",
+  "scenario_id": "synchronized_legacy_control_50pct",
+  "feature": "Mixed_Source_Ratio_LC_PFSA_PFCA",
+  "common_domain_scenarios": [
+    "synchronized_legacy_control_10pct",
+    "synchronized_legacy_control_25pct",
+    "synchronized_legacy_control_50pct",
+    "class_resolved_legacy_control_10pct",
+    "class_resolved_legacy_control_25pct",
+    "class_resolved_legacy_control_50pct"
+  ],
+  "domain_rule": "all four source features within training minima/maxima in all six scenarios",
+  "common_observations": 714,
+  "descriptor_change_percent": "100 * (scenario / baseline - 1)",
+  "all_descriptor_changes_positive": true,
+  "overall_min_percent": 0.14941753499868593,
+  "overall_max_percent": 2.0389972720146865,
+  "inputs": [
+    {
+      "filename": "Scenario_Paired_Predictions.csv",
+      "sha256": "5b45aededaa483e48953751a622d5aa3d9b2edee6a04f07a59b1a9f7bff33b54"
+    },
+    {
+      "filename": "Scenario_Paired_SHAP.csv",
+      "sha256": "c466331c194e6d60646985fcc4b6e3faade46cffcc904409f9b88b1bc6675aec"
+    }
+  ],
+  "script_sha256": "fb0c0336284b229735ef984ae5fbfa49352de1d35e47d825fd92612f252c4135",
+  "model_refitted": false,
+  "shap_recomputed": false,
+  "scope": "mixed_source_long_chain_ratio_descriptor_changes"
+}
