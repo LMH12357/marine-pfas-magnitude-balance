@@ -8,3 +8,15 @@ __pycache__/
 # Author-supplied raw workbooks are handled by the manuscript's data-sharing plan.
 data/raw/*.xlsx
 data/raw/*.xls
+
+# Provider products, local settings and scientific execution caches.
+*.local.json
+data/raw/*.nc
+data/raw/*.nc4
+data/raw/*.grib
+outputs*/
+smoke*/
+qa*/
+qa_*
+tests/artifacts/
+*.log

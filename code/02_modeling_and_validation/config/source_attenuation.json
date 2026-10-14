@@ -24,7 +24,7 @@
     {
       "scenario_id": "synchronized_legacy_control",
       "analysis_role": "negative_control",
-      "claim_scope": "Common long-chain attenuation control; it must preserve the long-chain PFSA/PFCA source ratio.",
+      "claim_scope": "Common long-chain attenuation control; preserves the long-chain PFSA/PFCA ratio at each source node, not the short/long ratio or necessarily the load-weighted mixed-source ratios.",
       "transition_intensity": 1.0,
       "legacy_mode": "synchronized",
       "short_mode": "reference"
@@ -152,7 +152,7 @@
       "contrast_id": "class_specific_legacy_100pct",
       "scenario_id": "class_resolved_legacy_control",
       "comparator_id": "synchronized_legacy_control",
-      "claim_scope": "Full-endpoint class-specific increment; retained as an out-of-domain stress contrast."
+      "claim_scope": "Full-endpoint class-specific increment; feature-domain support is evaluated against the current fitted data."
     },
     {
       "contrast_id": "short_chain_substitution_increment",

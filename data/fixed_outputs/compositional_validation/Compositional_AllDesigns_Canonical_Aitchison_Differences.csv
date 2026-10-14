@@ -1,4 +1,0 @@
-Validation,Delta_Aitchison_RMSE,CI_lower,CI_upper
-Sampling-grouped five-fold,-0.028,-0.098,0.031
-Sea-stratified spatial-block five-fold,-0.058,-0.101,0.000
-Leave-one-sampling-group-out,0.013,-0.051,0.067

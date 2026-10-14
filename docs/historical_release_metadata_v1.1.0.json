@@ -1,0 +1,25 @@
+{
+  "release_name": "marine-pfas-analysis-code",
+  "version": "1.1.0",
+  "release_date": "2026-10-09",
+  "previous_public_commit": "e0347a58d535f6bb56cc2a072aaa22b203dcaacd",
+  "historical_metadata": "docs/historical_release_metadata_v1.0.0.json",
+  "scope": "Analysis-only code and fixed numerical inputs/outputs; figure-layout and image-export code excluded",
+  "release_adaptations": [
+    "Sequential public filenames and directories",
+    "Repository-relative data and output paths",
+    "Explicit Monte Carlo seed for future regeneration",
+    "Fixed historical Monte Carlo realization retained as the authoritative downstream input",
+    "Paired inverse transformation and total long-chain burden change retained in analysis code",
+    "Contributor-specific paths removed from public manifests",
+    "Portable existing-output class-response and attribution postprocessing",
+    "Deterministic pooled OOF export on original group-ratio scales",
+    "Three-design compact composition-validation references with historical source provenance",
+    "Mixed-source long-chain ratio diagnostic on the shared perturbation domain"
+  ],
+  "fixed_input_sha256": {
+    "Step3_MonteCarlo_Flux_2018.csv": "7fe3ab1d98e9b43d8e48dc9110a5e4d5955c6f34fd6876457c6ce2d4404463ff",
+    "Step4_Coastline_Source_Load_2018.csv": "38b168027580a0469922fa90ac76030e93621ffd3c76e7c8509f7b55f23617c3",
+    "Long_Chain_Model_Feature_Table.csv": "0057c51827e31e01745ffec19141b48ccd1c2f1332df8219b40a2fc3a7be267d"
+  }
+}

@@ -30,13 +30,13 @@ provided separately from the numerical calculations.
 existing repository path convention. Explicit CLI paths can point to archived
 outputs anywhere accessible; no workstation path is embedded in the scripts.
 
-The first script prefers the upstream generated-output locations shown above.
-If a generated file is absent but its full counterpart exists under
-`data/fixed_outputs/source_attenuation_inference/` or
-`data/fixed_outputs/primary_model/`, respectively, that fixed file is used.
-If neither exists, the default remains the upstream generated location and the
-clear missing-file error is retained. No fallback to a workstation archive is
-hard-coded.
+The scripts use only the upstream generated-output locations shown above.
+They never silently substitute archived fixed outputs. Source files must have
+adjacent `Run_Manifest.json` files with matching `data_sha256`,
+`feature_table_sha256` and `pfas_schema_sha256`. Observation identities,
+metadata, cardinality and selected-model uniqueness are checked before
+combining outputs. Explicit CLI paths remain available, but do not bypass
+these generation checks.
 
 The paired CSV is the full output of
 `code/02_modeling_and_validation/03_source_attenuation_inference.py`.
@@ -59,7 +59,7 @@ models or fabricate missing input rows.
 
 ## Commands
 
-With the upstream default output locations, or the existing full fixed-output fallbacks:
+With the upstream default output locations:
 
 ```sh
 python code/03_evidence_strengthening/wr_evidence_strengthening.py
@@ -100,8 +100,8 @@ hashes without replacing the historical analysis manifest.
 
 The fixed analysis uses seed **20261007**, **10,000** group-bootstrap resamples,
 the same six synchronized/class-resolved 10/25/50 scenarios, and their common
-source-feature minimum–maximum domain. The archived data produce **714
-observations from 21 sampling groups** in that common set. Class-specific
+source-feature minimum–maximum domain. Observation and sampling-group counts
+are recalculated from the current inputs, not copied from previous runs. Class-specific
 percentage changes are derived from mean paired log changes. Group-equal and
 leave-one-group-out sensitivities are postprocessing, not new primary-model fits.
 
@@ -115,7 +115,7 @@ script/output hashes and the retained random-number sequence.
 ### Historical random-number sequence
 
 For each target/validation/feature group, the generator starts at seed
-20261007 and performs **500** successive
+20261007 using explicit `numpy.random.Generator(PCG64)` and performs **500** successive
 `rng.integers(0, n_unique_groups, n_unique_groups)` calls before the **10,000**
 fold-centered and **10,000** original-scale quartile draws, in that order.
 
@@ -135,7 +135,9 @@ The exploratory section fits low-dimensional descriptive linear/hinge curves
 to existing attributions. These are not the primary RF/XGBoost models.
 Knot estimates are **not physical fronts, adsorption/desorption thresholds,
 or measured sediment-release rates**. Reported TOC/MLD quartile results use
-existing OOF SHAP; 9 TOC and 8 MLD groups meet the paired-band eligibility rule.
+existing OOF SHAP. Quartiles are pooled across the selected observations;
+group-specific high-minus-low means are calculated only for groups with
+observations in both tails. Eligible group counts are exported dynamically.
 
 ## Verification
 
@@ -163,5 +165,5 @@ source-node total-load weights can change, so the receiving-location
 mixed-source ratio descriptor need not remain identical. This is a weighting
 diagnostic, not proof that environmental covariates alone caused a response,
 nor a sediment exchange-flux calculation. It does not refit primary models or
-recompute SHAP. Its independent tests and numerical verification are separate
-from the 9 historical-output checks above.
+recompute SHAP. Independent numerical and input-integrity regression tests
+are maintained under `tests/`.

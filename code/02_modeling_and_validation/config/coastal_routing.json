@@ -1,0 +1,32 @@
+{
+  "geography_review_complete": true,
+  "boundary_crs": "EPSG:4326",
+  "bounds": [105.0, 18.0, 131.0, 42.0],
+  "base_resolution": 0.1,
+  "displacement_review_km": 20,
+  "refinement_patches": [
+    {"name": "Nandu coastal inlet", "bounds": [109.9, 20.6, 110.7, 21.3], "resolution": 0.02},
+    {"name": "Shenzhen Bay", "bounds": [113.6, 22.1, 114.2, 22.8], "resolution": 0.02},
+    {"name": "Jiaozhou Bay", "bounds": [119.9, 35.8, 120.8, 36.5], "resolution": 0.02},
+    {"name": "Dingzi Bay", "bounds": [120.7, 36.4, 121.2, 36.8], "resolution": 0.01},
+    {"name": "Wuzhu estuary", "bounds": [122.1, 37.3, 122.5, 37.6], "resolution": 0.02},
+    {"name": "Nanpai estuary", "bounds": [117.5, 38.4, 117.9, 38.7], "resolution": 0.02},
+    {"name": "Xinhuai estuary", "bounds": [119.9, 34.2, 120.3, 34.6], "resolution": 0.02},
+    {"name": "Ou estuary", "bounds": [120.7, 27.8, 121.2, 28.2], "resolution": 0.02},
+    {"name": "Jiulong estuary", "bounds": [117.8, 24.2, 118.4, 24.7], "resolution": 0.02},
+    {"name": "Zhaoan inlet", "bounds": [117.1, 23.5, 117.5, 23.9], "resolution": 0.01},
+    {"name": "Min estuary", "bounds": [119.4, 25.9, 119.9, 26.3], "resolution": 0.01},
+    {"name": "Tianjin inlet", "bounds": [117.6, 38.8, 118.1, 39.2], "resolution": 0.01},
+    {"name": "Qinzhou Bay", "bounds": [108.1, 21.4, 108.8, 22.0], "resolution": 0.01},
+    {"name": "Qinzhou inner inlet", "bounds": [108.25, 21.55, 108.45, 21.75], "resolution": 0.005}
+  ],
+  "source_constraints": [
+    {"name": "Wulong River", "original_coordinates": [120.592, 36.565], "bounds": [120.76, 36.52, 120.98, 36.68], "reviewed": true, "review_basis": "The river enters Dingzi Bay, not the southern open coast. Laiyang municipal description and the local named river layer identify the receiving bay. The original source coordinate is retained; bounds define a numerical receiving-water anchor. https://www.laiyang.gov.cn/art/2022/4/7/art_18311_1574506.html"},
+    {"name": "Wuzhu River", "original_coordinates": [122.152, 37.261], "bounds": [122.24, 37.42, 122.30, 37.48], "reviewed": true, "review_basis": "Weihai EIA locates the Wuzhu estuary marina at 122 deg 16 min 1.542 sec E, 37 deg 25 min 36.084 sec N. The selected wet cell must remain near this estuary, not the western nearest shoreline. https://sthjj.weihai.gov.cn/attach/0/00cdbd13fa034bbe9f65e9635777febf.pdf"},
+    {"name": "Nanpai River", "original_coordinates": [117.652, 38.081], "bounds": [117.62, 38.48, 117.74, 38.56], "reviewed": true, "review_basis": "The named river vector reaches 117.63172 E, 38.495285 N. An independent river-mouth field study reports Nanpai marine site C5 at 117 deg 40 min 34.38 sec E, 38 deg 29 min 57.52 sec N. The closer southern coast is not this outlet. https://www.sciengine.com/doi/pdfView/00B6DD0D4E1440659879AC8E611F3964"},
+    {"name": "Tan River", "original_coordinates": [113.112, 22.415], "bounds": [113.06, 22.16, 113.14, 22.24], "reviewed": true, "review_basis": "Tan River drains through Yamen Channel. The MSA places Yamen bridge navigation lights around 113 deg 05 min E, 22 deg 13 min N; the existing wet node 113.1 E, 22.2 N represents the same receiving channel. https://www.msa.gov.cn/public/documents/document/mta0/oduw/~edisp/20221202104850856.pdf"},
+    {"name": "Xinhuai River", "original_coordinates": [120.082, 34.181], "bounds": [120.06, 34.38, 120.16, 34.44], "reviewed": true, "review_basis": "Receiving-water bounds, not a replacement mouth measurement. The published marine zoning table locates the Zhongshan mouth special-use area at 120.13 E, 34.42 N and its southern nearshore fishery boundary at 120.07 E, 34.36 N to 120.12 E, 34.37 N. These locate the outlet neighbourhood north of the original source coordinate, not at the nearest southern coast. https://www.sciengine.com/doi/pdfView/49FC62601A4E4088B896E5DF44D24F45 ; https://tzw.nantong.gov.cn/tzwjhldkfsfq/upload/38798b86-5d79-43e9-9101-9518088cd810.pdf"},
+    {"name": "Ou River", "original_coordinates": [120.801, 27.952], "bounds": [120.82, 27.96, 121.12, 28.10], "reviewed": true, "review_basis": "Receiving-water bounds for the Ou estuary at Lingkun; no source coordinate or load is changed. The Wenzhou marine support-base EIA places the shoreline project at 120 deg 56 min 54.781 sec E, 27 deg 57 min 19.770 sec N, with the Ou estuary immediately to its north. The use-of-sea report independently locates this frontage within the Ou estuary port area. https://ojk.wenzhou.gov.cn/module/download/downfile.jsp?classid=0&filename=06e396bb00654495b1656d63d22c5164.pdf ; https://zjjcmspublic.oss-cn-hangzhou-zwynet-d01-a.internet.cloud.zj.gov.cn/jcms_files/jcms1/web2662/site/attach/0/bac887e24f454ecf801eb4754829d03f.pdf"}
+  ],
+  "observation_constraints": []
+}

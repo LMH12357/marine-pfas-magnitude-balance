@@ -1,5 +1,9 @@
 # Numerical verification of evidence post-processing
 
+Historical v1.1.0 verification. Its sample counts and archived outputs belong
+to commit `6685c27e34602e4c207d1316d645cbc24c204499`. Current v2 verification is
+recorded separately in `release_validation_v2_0_0.json`.
+
 Verification date: 2026-10-09. Environment: Python 3.13.7, NumPy 2.3.3 and
 pandas 2.3.2. The checks used archived predictions and held-out attributions;
 the primary RF/XGB models, SHAP calculations and source inventory were not rerun.

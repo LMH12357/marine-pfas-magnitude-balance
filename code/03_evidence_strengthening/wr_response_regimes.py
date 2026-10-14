@@ -5,8 +5,14 @@ import argparse
 import os
 import json
 import hashlib
+import sys
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evidence_contract import boolean_flags, validate_selected_shap
+from pfas_schema import FEATURE_ALIASES, schema_digest
 
 
 def parse_arguments():
@@ -92,6 +98,14 @@ def run(input_csv: Path, output_dir: Path, include_exploratory: bool = False):
         )
     OUT.mkdir(parents=True, exist_ok=True)
     d = pd.read_csv(input_csv)
+    d["feature"] = d.feature.replace(FEATURE_ALIASES)
+    validate_selected_shap(d)
+    if "Sampling_Group" not in d or d.Sampling_Group.isna().any():
+        raise ValueError("Attribution contrasts require sampling-group identities")
+    if "selected_in_fold" in d and not boolean_flags(d.selected_in_fold).all():
+        raise ValueError("Only fold-selected models may enter attribution contrasts")
+    if "feature_block" in d and not d.feature_block.eq("all").all():
+        raise ValueError("Attribution contrasts require the full-predictor block")
     rows = []
     contrasts = []
     for (target, val, feature), g in d.groupby(["target", "validation", "feature"]):
@@ -100,13 +114,19 @@ def run(input_csv: Path, output_dir: Path, include_exploratory: bool = False):
         native = g.feature_value.to_numpy()
         y = g.y.to_numpy()
         groups = g.Sampling_Group.to_numpy()
-        rng = np.random.default_rng(20261007)
+        rng = np.random.Generator(np.random.PCG64(20261007))
         ug, gi = np.unique(groups, return_inverse=True)
         if include_exploratory:
             islog = feature == "Diffused_Total_Legacy_Force"
+            if islog and (native <= 0).any():
+                raise ValueError("Exploratory log-scale forcing must be positive")
             xt = np.log10(native) if islog else native.copy()
             center = xt.mean()
             scale = xt.std()
+            if scale == 0 or len(ug) < 2:
+                raise ValueError(
+                    "Exploratory fits require varying feature values and multiple sampling groups"
+                )
             x = (xt - center) / scale
             sizes = g.groupby("Sampling_Group").size()
             w = np.array([1 / sizes[t] for t in groups])
@@ -200,6 +220,11 @@ def run(input_csv: Path, output_dir: Path, include_exploratory: bool = False):
         input_sha256=hashlib.sha256(input_csv.read_bytes()).hexdigest(),
         script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         seed=20261007,
+        random_generator="numpy.random.Generator(PCG64)",
+        pfas_schema_sha256=schema_digest(),
+        quartile_rule="Pooled feature quartiles; compare high-versus-low means within each sampling group with observations in both tails",
+        input_rows=len(d),
+        sampling_groups=int(d.Sampling_Group.nunique()),
         include_exploratory=include_exploratory,
         exploratory_knot_bootstrap_replicates=500 if include_exploratory else 0,
         historical_rng_prefix_draws_per_feature_group=500,

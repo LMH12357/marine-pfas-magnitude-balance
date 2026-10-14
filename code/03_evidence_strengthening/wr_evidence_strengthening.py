@@ -5,8 +5,20 @@ import argparse
 import os
 import json
 import hashlib
+import sys
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evidence_contract import (
+    boolean_flags,
+    merge_observation_metadata,
+    validate_scenarios,
+    validate_selected_shap,
+    validate_run_provenance,
+)
+from pfas_schema import FEATURE_ALIASES, schema_digest
 
 SEED = 20261007
 B = 10000
@@ -21,11 +33,6 @@ def parse_arguments():
         .expanduser()
         .resolve()
     )
-    data_root = (
-        Path(os.environ.get("PFAS_DATA_ROOT", repository / "data"))
-        .expanduser()
-        .resolve()
-    )
     output_root = (
         Path(os.environ.get("PFAS_OUTPUT_ROOT", repository / "outputs"))
         .expanduser()
@@ -36,39 +43,20 @@ def parse_arguments():
         / "03_source_attenuation_inference"
         / "Scenario_Paired_Predictions.csv"
     )
-    scenario_fixed = (
-        data_root
-        / "fixed_outputs"
-        / "source_attenuation_inference"
-        / "Scenario_Paired_Predictions.csv"
-    )
     shap_generated = output_root / "01_primary_model" / "Nested_OOF_SHAP_Values.csv"
-    shap_fixed = (
-        data_root / "fixed_outputs" / "primary_model" / "Nested_OOF_SHAP_Values.csv"
-    )
-    scenario_default = (
-        scenario_generated
-        if scenario_generated.is_file() or not scenario_fixed.is_file()
-        else scenario_fixed
-    )
-    shap_default = (
-        shap_generated
-        if shap_generated.is_file() or not shap_fixed.is_file()
-        else shap_fixed
-    )
     parser = argparse.ArgumentParser(
         description="Post-process existing paired source scenarios and nested OOF SHAP; do not retrain models."
     )
     parser.add_argument(
         "--scenario-input",
         type=Path,
-        default=scenario_default,
+        default=scenario_generated,
         help="Existing paired predictions CSV from 03_source_attenuation_inference.py.",
     )
     parser.add_argument(
         "--shap-input",
         type=Path,
-        default=shap_default,
+        default=shap_generated,
         help="Existing held-out SHAP CSV from 01_primary_model_training.py, not an importance summary.",
     )
     parser.add_argument(
@@ -83,7 +71,9 @@ def parse_arguments():
 def summary(g, col):
     """Cluster bootstrap record-weighted log change; group-equal sensitivity."""
     a = g.groupby("Sampling_Group")[col].agg(["sum", "count", "mean"])
-    rng = np.random.default_rng(SEED)
+    if a.empty or not np.isfinite(g[col].to_numpy(dtype=float)).all():
+        raise ValueError("Bootstrap summaries require nonempty finite log changes")
+    rng = np.random.Generator(np.random.PCG64(SEED))
     ii = rng.integers(0, len(a), size=(B, len(a)))
     boot = a["sum"].to_numpy()[ii].sum(axis=1) / a["count"].to_numpy()[ii].sum(axis=1)
     mean = g[col].mean()
@@ -121,6 +111,7 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
             + "; ".join(missing)
             + ". Supply --scenario-input and --shap-input explicitly; this script does not train models or calculate SHAP."
         )
+    provenance = validate_run_provenance((src, shp_src), schema_digest())
     output_names = (
         "paired_class_responses.csv",
         "regional_class_response_summary.csv",
@@ -139,31 +130,40 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
     raw = pd.read_csv(src)
     ids = [f"{p}_legacy_control_{l}pct" for p in paths for l in levels]
     d = raw[raw.scenario_id.isin(ids)].copy()
-    assert len(d) == 6 * 789
-    assert not d.duplicated(["scenario_id", "row_index"]).any()
-    d["supported"] = d.outside_source_minmax_any.astype(str).str.lower().eq("false")
+    validate_scenarios(d, ids)
+    d["supported"] = ~boolean_flags(d.outside_source_minmax_any)
     d["path"] = d.scenario_id.str.replace(r"_legacy_control_\d+pct$", "", regex=True)
     d["path_pct"] = d.scenario_id.str.extract(r"_(\d+)pct$").astype(int)
     for c in ["PFSA", "PFCA", "Total"]:
-        assert (d[f"Long_{c}_baseline"] > 0).all() and (
-            d[f"Long_{c}_scenario"] > 0
-        ).all()
+        component_values = d[[f"Long_{c}_baseline", f"Long_{c}_scenario"]].to_numpy(
+            dtype=float
+        )
+        if not np.isfinite(component_values).all() or not (component_values > 0).all():
+            raise ValueError(f"{c} concentrations must be finite and positive")
         delta = np.log(d[f"Long_{c}_scenario"] / d[f"Long_{c}_baseline"])
-        assert np.allclose(delta, d[f"Log_Long_{c}_delta"], atol=1e-10)
-    assert np.allclose(
-        d.Long_Total_scenario, d.Long_PFSA_scenario + d.Long_PFCA_scenario
-    )
-    assert np.allclose(
-        d.Log_Long_PFSA_delta,
-        (d.Long_Magnitude_delta + d.Long_Balance_delta) / np.sqrt(2),
-    )
-    assert np.allclose(
-        d.Log_Long_PFCA_delta,
-        (d.Long_Magnitude_delta - d.Long_Balance_delta) / np.sqrt(2),
-    )
+        if not np.allclose(delta, d[f"Log_Long_{c}_delta"], atol=1e-10):
+            raise ValueError(f"{c} concentration and log-change exports disagree")
+    for observed, expected, label in (
+        (d.Long_Total_scenario, d.Long_PFSA_scenario + d.Long_PFCA_scenario, "total"),
+        (
+            d.Log_Long_PFSA_delta,
+            (d.Long_Magnitude_delta + d.Long_Balance_delta) / np.sqrt(2),
+            "PFSA",
+        ),
+        (
+            d.Log_Long_PFCA_delta,
+            (d.Long_Magnitude_delta - d.Long_Balance_delta) / np.sqrt(2),
+            "PFCA",
+        ),
+        (d.Log_Long_Ratio_delta, np.sqrt(2) * d.Long_Balance_delta, "ratio"),
+    ):
+        if not np.allclose(observed, expected, atol=1e-10):
+            raise ValueError(f"Magnitude/Balance reconstruction disagrees for {label}")
     fixed = set.intersection(
         *(set(d.loc[d.scenario_id.eq(i) & d.supported, "row_index"]) for i in ids)
     )
+    if not fixed:
+        raise ValueError("The fixed common source-feature domain is empty")
     d["fixed_common_support"] = d.row_index.isin(fixed)
     d["paired_path_support"] = False
     for l in levels:
@@ -234,18 +234,19 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
     # OOF diagnostics: report descriptive, group-balanced binned curves, not flux thresholds.
     s = pd.read_csv(shp_src)
     s = s[
-        s.selected_in_fold.astype(str).str.lower().eq("true")
+        boolean_flags(s.selected_in_fold)
         & s.feature_block.eq("all")
         & s.validation.isin(["sampling_group", "spatial_block_stratified"])
     ].copy()
     meta = raw[raw.scenario_id.eq("reference")][
         ["row_index", "Sampling_Group", "Sea_Region"]
     ]
-    s = s.merge(meta, on="row_index", validate="many_to_one")
+    s = merge_observation_metadata(s, meta)
+    s["feature"] = s.feature.replace(FEATURE_ALIASES)
     wanted = [
         "Diffused_Total_Legacy_Force",
         "Hydro_MLD",
-        "TOC (%)",
+        "TOC",
         "Mixed_Source_Ratio_LC_PFSA_PFCA",
     ]
     wanted += [
@@ -254,7 +255,7 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
         if x.startswith("Salinity") or x.startswith("Temperature")
     ]
     s = s[s.feature.isin(wanted)].copy()
-    assert not s.duplicated(["target", "validation", "feature", "row_index"]).any()
+    validate_selected_shap(s)
     bins = []
     slopes = []
     for (target, validation, feature), g in s.groupby(
@@ -266,12 +267,16 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
             "mean"
         )
         edges = np.unique(g.feature_value.quantile(np.linspace(0, 1, 7)).to_numpy())
-        g["bin"] = pd.cut(g.feature_value, edges, include_lowest=True, labels=False)
+        g["bin"] = (
+            pd.cut(g.feature_value, edges, include_lowest=True, labels=False)
+            if len(edges) > 1
+            else 0
+        )
         for bn, h in g.groupby("bin"):
             gm = h.groupby("Sampling_Group").centered_shap.mean()
             foldmeans = h.groupby("fold").centered_shap.mean()
             vals = gm.to_numpy()
-            rng = np.random.default_rng(SEED)
+            rng = np.random.Generator(np.random.PCG64(SEED))
             bb = vals[rng.integers(0, len(vals), (B, len(vals)))].mean(axis=1)
             lo, hi = np.quantile(bb, [0.025, 0.975])
             bins.append(
@@ -313,6 +318,9 @@ def run(scenario_input: Path, shap_input: Path, output_dir: Path):
     s.to_csv(OUT / "oof_selected_feature_values.csv", index=False)
     manifest = dict(
         seed=SEED,
+        random_generator="numpy.random.Generator(PCG64)",
+        pfas_schema_sha256=schema_digest(),
+        upstream_provenance=provenance,
         bootstrap_replicates=B,
         raw_scenario_rows=len(raw),
         selected_scenario_rows=len(d),

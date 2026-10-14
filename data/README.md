@@ -1,42 +1,45 @@
-# Data files used by the analysis release
+# Data inputs for version 2.0.0
 
-## Fixed inputs included in GitHub
+The current code release includes the reference inputs needed to define sea
+regions, coastline geometry and literature-derived source-transition factors.
+Corrected observation workbooks and generated analysis products are shared as
+a separate versioned research-data package.
 
-### Source boundary
+## Reference inputs
 
-- `fixed_inputs/source_boundary/Step3_MonteCarlo_Flux_2018.csv`: fixed compound-resolved 2018 river-flux realization used in the manuscript.
-- `fixed_inputs/source_boundary/Step4_Coastline_Source_Load_2018.csv`: deterministic coastline source descriptors derived from Step 3.
-- `provenance.json` and `README.md`: hashes and historical-seed explanation.
+- `reference/geospatial/china_marginal_sea_regions.geojson`
+- `reference/geospatial/china_coastline_boundary.shp` and `.shx`
+- `reference/source_transition/cai_2025_table_s8_usage.csv`
+- `reference/source_transition/cai_2025_gdr_mapping.csv`
+- `reference/source_transition/cai_2025_application_release_factors.csv`
 
-### Model input
+## Required external inputs
 
-- `fixed_inputs/model/Long_Chain_Model_Feature_Table.csv`: exact metadata-migrated input table used for primary and validation models; SHA-256 `0057c51827e31e01745ffec19141b48ccd1c2f1332df8219b40a2fc3a7be267d`.
+Configure the actual paths to these author-shared files and provider products:
 
-### Reference data
+- Corrected `DATA.xlsx`.
+- `100_Rivers_2018.xlsx` and `estuary.xlsx`.
+- `Sediment TOC_metadata.xlsx`.
+- `China Sediment Bulletin.xlsx`.
+- CMEMS, NASA and GloFAS products required by the selected extraction modules.
 
-- `reference/source_transition/`: literature-extracted use data, compound grouping and release factors used to derive the bounded source-transition multipliers.
-- `reference/geospatial/china_marginal_sea_regions.geojson`: canonical sea-region reference.
-- `reference/geospatial/china_coastline_boundary.shp/.shx`: coastline geometry used for source routing.
+The environment/source example configurations document their roles. Large
+third-party products are not redistributed. Provider identifiers and per-record
+extraction details are recorded when the upstream calculations run.
 
-## Compact fixed outputs
+## Generation and provenance
 
-- `fixed_outputs/primary_model/`: final model package and compact performance, reconstructed-output, feature-block and SHAP-stability summaries.
-- `fixed_outputs/boundary_sensitivity/`: boundary-exclusion performance summary.
-- `fixed_outputs/source_attenuation_boundary/`: complete prespecified source-boundary products.
-- `fixed_outputs/source_attenuation_inference/Scenario_Prediction_Summary.csv`: final scenario summary, including paired back-transformed total long-chain PFAS burden changes and cluster-bootstrap intervals.
-- `fixed_outputs/compositional_validation/` and `magnitude_balance_validation/`: compact SI validation summaries.
+The verified corrected primary run uses 751 eligible observations, 22 sampling
+groups and 80 source nodes. The corrected raw workbook, Step3 compound fluxes,
+Step4 source loads and final model hashes are recorded in
+`../release_metadata.json`. Those hashes identify the completed scientific
+generation without including raw workbooks in this code repository.
 
-These fixed outputs support exact numerical comparison. The analysis scripts can regenerate the full, larger intermediate files.
+Run `run_analysis.py` against corrected workbooks and the newly generated Step3
+and Step4 products. Do not use v1.1.0 fixed numerical products as substitutes.
+The preceding `fixed_inputs` and `fixed_outputs` remain accessible at commit
+`6685c27e34602e4c207d1316d645cbc24c204499`.
 
-## External inputs not duplicated
-
-Place author-shared raw files under `data/raw/` when rerunning the corresponding upstream steps:
-
-- `DATA.xlsx`;
-- `100_Rivers_2018.xlsx`;
-- `estuary.xlsx`;
-- `Sediment TOC_metadata.xlsx`;
-- optional `China Sediment Bulletin.xlsx`;
-- provider-specific NASA, CMEMS and GloFAS NetCDF files/directories named in the extraction scripts.
-
-The harmonized observation workbook should be deposited and cited through the manuscript's data repository. Large third-party satellite products remain subject to provider access and redistribution conditions.
+The separate data record and figure source-data package must use these same
+input/result identities. No DOI or accession is asserted until the associated
+data record has actually been deposited.

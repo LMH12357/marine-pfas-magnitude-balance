@@ -1,34 +1,30 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
+import logging
 import os
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
-
-BASE_YEAR = 2018
-TAXONOMY = {
-    "LC_PFCA": ["PFOA", "PFNA", "PFDA", "PFUnDA", "PFDoDA", "PFTrDA", "PFTeDA", "PFHxDA", "PFODA"],
-    "LC_PFSA": ["PFHxS", "PFHpS", "PFOS", "PFNS", "PFDS", "PFECHS"],
-    "SC_PFCA": ["PFBA", "PFPeA", "PFHxA", "PFHpA"],
-    "SC_PFSA": ["PFBS", "PFPeS"],
-}
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+from source_common import (
+    BASE_YEAR,
+    PFAS_COMPOUNDS,
+    TAXONOMY,
+    numeric_column,
+    require_columns,
+    write_manifest,
+)
 
 
 def default_project_root() -> Path:
     configured = os.environ.get("PFAS_PROJECT_ROOT")
-    return Path(configured).expanduser().resolve() if configured else Path(__file__).resolve().parents[3]
+    return (
+        Path(configured).expanduser().resolve()
+        if configured
+        else Path(__file__).resolve().parents[3]
+    )
 
 
 def build_coastline_source_load(step3_file: Path, output_file: Path) -> pd.DataFrame:
@@ -40,6 +36,47 @@ def build_coastline_source_load(step3_file: Path, output_file: Path) -> pd.DataF
     source = pd.read_csv(step3_file)
     if source.empty:
         raise ValueError(f"No data found in {step3_file}")
+    flux_columns = [f"{compound}_Flux_Kg" for compound in PFAS_COMPOUNDS]
+    require_columns(
+        source,
+        ["Year", "Grid_Lon", "Grid_Lat", "Expected_Total_Flux_Kg", *flux_columns],
+        step3_file,
+    )
+    for column in [
+        "Year",
+        "Grid_Lon",
+        "Grid_Lat",
+        "Expected_Total_Flux_Kg",
+        *flux_columns,
+    ]:
+        source[column] = numeric_column(
+            source,
+            column,
+            step3_file,
+            nonnegative=column not in ("Grid_Lon", "Grid_Lat"),
+        )
+    if (
+        source[
+            ["Year", "Grid_Lon", "Grid_Lat", "Expected_Total_Flux_Kg", *flux_columns]
+        ]
+        .isna()
+        .any()
+        .any()
+    ):
+        raise ValueError(f"Missing flux or coordinate values in {step3_file}")
+    if not source.Year.eq(BASE_YEAR).all():
+        raise ValueError(
+            f"Source inventory must contain only {BASE_YEAR}: {step3_file}"
+        )
+    if source.duplicated(["Grid_Lon", "Grid_Lat"]).any():
+        raise ValueError(f"Duplicate source nodes in {step3_file}")
+    allocated = source[flux_columns].sum(axis=1)
+    if not np.allclose(
+        allocated, source.Expected_Total_Flux_Kg, rtol=1e-10, atol=1e-12
+    ):
+        raise ValueError(
+            f"Compound fluxes do not conserve total source flux in {step3_file}"
+        )
 
     records: list[dict[str, float]] = []
     for _, row in source.iterrows():
@@ -53,47 +90,69 @@ def build_coastline_source_load(step3_file: Path, output_file: Path) -> pd.DataF
         }
         sum_lc = totals["LC_PFCA"] + totals["LC_PFSA"]
         sum_sc = totals["SC_PFCA"] + totals["SC_PFSA"]
-        if min(sum_lc, totals["LC_PFCA"], totals["SC_PFCA"]) <= 0:
-            raise ValueError("A required PFAS class total is zero; source ratios are undefined.")
-        records.append({
-            "Grid_Lon": float(row["Grid_Lon"]),
-            "Grid_Lat": float(row["Grid_Lat"]),
-            "Load_Total_Legacy_Kg": round(float(row["Expected_Total_Flux_Kg"]), 4),
-            "Source_Ratio_SC_LC": round(sum_sc / sum_lc, 6),
-            "Source_Ratio_LC_PFSA_PFCA": round(totals["LC_PFSA"] / totals["LC_PFCA"], 6),
-            "Source_Ratio_SC_PFSA_PFCA": round(totals["SC_PFSA"] / totals["SC_PFCA"], 6),
-        })
+        if any(total <= 0 for total in totals.values()):
+            raise ValueError(
+                f"A PFAS class lacks positive support at {row['Grid_Lon']}, {row['Grid_Lat']}."
+            )
+        records.append(
+            {
+                "Grid_Lon": float(row["Grid_Lon"]),
+                "Grid_Lat": float(row["Grid_Lat"]),
+                "Year": BASE_YEAR,
+                "Load_Total_Legacy_Kg": float(row["Expected_Total_Flux_Kg"]),
+                "Source_Ratio_SC_LC": sum_sc / sum_lc,
+                "Source_Ratio_LC_PFSA_PFCA": totals["LC_PFSA"] / totals["LC_PFCA"],
+                "Source_Ratio_SC_PFSA_PFCA": totals["SC_PFSA"] / totals["SC_PFCA"],
+                **{f"{group}_Flux_Kg": total for group, total in totals.items()},
+            }
+        )
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    frame = pd.DataFrame(records).sort_values(["Grid_Lat", "Grid_Lon"]).reset_index(drop=True)
+    frame = (
+        pd.DataFrame(records)
+        .sort_values(["Grid_Lat", "Grid_Lon"])
+        .reset_index(drop=True)
+    )
     frame.to_csv(output_file, index=False, encoding="utf-8-sig")
-    manifest = {
-        "analysis": "2018 coastline source-load aggregation",
-        "base_year": BASE_YEAR,
-        "rows": len(frame),
-        "input": {"file": step3_file.name, "sha256": sha256(step3_file)},
-        "output": {"file": output_file.name, "sha256": sha256(output_file)},
-    }
-    output_file.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    print(f"Exported {len(frame)} coastline source nodes to {output_file}")
+    write_manifest(
+        output_file,
+        "2018 coastline source-load aggregation",
+        {"compound_flux": step3_file},
+        rows=len(frame),
+        compound_groups=TAXONOMY,
+        precision="Full numeric precision retained for model inputs",
+        total_flux_conserved=True,
+    )
+    logging.info("Exported %s coastline source nodes to %s", len(frame), output_file)
     return frame
 
 
 def parse_arguments() -> argparse.Namespace:
     root = default_project_root()
-    fixed = root / "data" / "fixed_inputs" / "source_boundary"
-    parser = argparse.ArgumentParser(description="Aggregate the fixed 2018 compound inventory into model source descriptors.")
+    parser = argparse.ArgumentParser(
+        description="Aggregate regenerated 2018 compound fluxes into coastal source predictors."
+    )
     parser.add_argument("--project-root", type=Path, default=root)
     parser.add_argument("--input", type=Path)
     parser.add_argument("--output", type=Path)
     arguments = parser.parse_args()
     arguments.project_root = arguments.project_root.expanduser().resolve()
-    output_root = Path(os.environ.get("PFAS_OUTPUT_ROOT", arguments.project_root / "outputs")).expanduser().resolve()
-    arguments.input = arguments.input or fixed / "Step3_MonteCarlo_Flux_2018.csv"
-    arguments.output = arguments.output or output_root / "exogenous" / "Step4_Coastline_Source_Load_2018.csv"
+    output_root = (
+        Path(os.environ.get("PFAS_OUTPUT_ROOT", arguments.project_root / "outputs"))
+        .expanduser()
+        .resolve()
+    )
+    arguments.input = (
+        arguments.input or output_root / "exogenous" / "Step3_MonteCarlo_Flux_2018.csv"
+    )
+    arguments.output = (
+        arguments.output
+        or output_root / "exogenous" / "Step4_Coastline_Source_Load_2018.csv"
+    )
     return arguments
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args = parse_arguments()
     build_coastline_source_load(args.input, args.output)

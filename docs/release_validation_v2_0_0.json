@@ -1,0 +1,59 @@
+{
+  "verification_date": "2026-10-14",
+  "version": "2.0.0",
+  "python_runtime": "3.13.7",
+  "production_stage_count": 11,
+  "production_products_checked": 129,
+  "frozen_model_unchanged": true,
+  "frozen_core_bytes_preserved": true,
+  "tests_run": 98,
+  "unittest_success": true,
+  "regional_compact_checks": {
+    "checks": [
+      "CLI and import",
+      "all dense regional columns at both paths and 0/10/25/50 positions",
+      "frozen scenario predictions",
+      "native-estimator serialization equivalence",
+      "RF and XGB paired SHAP blocks at both 50-percent path positions",
+      "SHAP additivity",
+      "manual fifth-nearest different-group distances",
+      "distance unit invariance",
+      "interaction masks without fixed feature count"
+    ],
+    "passed": true,
+    "dense_rows": 32,
+    "training_n": 751,
+    "training_groups": 22,
+    "common_n": 606,
+    "max_shap_block_difference": 2.220446049250313e-16,
+    "paired_additivity": [
+      {
+        "model": "RF",
+        "path": "class_resolved",
+        "max_additivity_error": 4.440892098500626e-15
+      },
+      {
+        "model": "RF",
+        "path": "synchronized",
+        "max_additivity_error": 4.884981308350689e-15
+      },
+      {
+        "model": "XGB",
+        "path": "class_resolved",
+        "max_additivity_error": 1.1026859283447266e-06
+      },
+      {
+        "model": "XGB",
+        "path": "synchronized",
+        "max_additivity_error": 1.1622905731201172e-06
+      }
+    ],
+    "production_model_sha256": "cfb296d1f6cfde08ab1d201576fc45740fbca8f5db62b29b89c75c56a46ec611",
+    "full_alternative_search_rerun": false,
+    "group_deletion_refits_rerun": false
+  },
+  "raw_workbooks_in_code_release": false,
+  "figure_code_in_code_release": false,
+  "historical_fixed_products_available_in_git_history": true,
+  "full_model_or_group_deletion_rerun_this_release": false
+}

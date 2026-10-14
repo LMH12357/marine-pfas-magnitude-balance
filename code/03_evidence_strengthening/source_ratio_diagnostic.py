@@ -6,10 +6,16 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evidence_contract import validate_scenarios, validate_run_provenance
+from pfas_schema import schema_digest
 
 FEATURE = "Mixed_Source_Ratio_LC_PFSA_PFCA"
 SCENARIO = "synchronized_legacy_control_50pct"
@@ -52,10 +58,7 @@ def summarize_descriptor_changes(
         if missing:
             raise ValueError(f"Missing columns: {sorted(missing)}")
     selected = predictions.loc[predictions.scenario_id.isin(COMMON_SCENARIOS)].copy()
-    if set(selected.scenario_id) != set(COMMON_SCENARIOS):
-        raise ValueError("All six common-domain scenarios are required")
-    if selected.duplicated(["scenario_id", "row_index"]).any():
-        raise ValueError("Duplicate paired-prediction scenario/row identities")
+    validate_scenarios(selected, COMMON_SCENARIOS)
     selected["outside"] = _boolean_flags(selected.outside_source_minmax_any)
     support = selected.groupby("row_index").agg(
         scenario_count=("scenario_id", "nunique"), outside=("outside", "any")
@@ -153,6 +156,9 @@ def main() -> None:
         "--output-dir", type=Path, default=output_root / "source_ratio_diagnostic"
     )
     arguments = parser.parse_args()
+    provenance = validate_run_provenance(
+        (arguments.predictions, arguments.paired_shap), schema_digest()
+    )
     check_output_paths(
         (arguments.predictions, arguments.paired_shap),
         (
@@ -178,6 +184,8 @@ def main() -> None:
     )
     manifest = {
         "analysis": "mixed_source_long_chain_ratio_diagnostic",
+        "pfas_schema_sha256": schema_digest(),
+        "upstream_provenance": provenance,
         "scenario_id": SCENARIO,
         "feature": FEATURE,
         "common_domain_scenarios": list(COMMON_SCENARIOS),

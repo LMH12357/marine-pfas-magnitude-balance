@@ -120,22 +120,26 @@ class PooledOOFTests(unittest.TestCase):
         features = pfas.copy()
         for column in PREPROCESSING.COVARIATES:
             features[column] = 1.0
-        reconstructed = {name: pfas.copy() for name in PREPROCESSING.SCHEMES}
-        statuses = pd.DataFrame(
-            PREPROCESSING.MEASURED, index=pfas.index, columns=pfas.columns
-        )
-        limits = pd.DataFrame(np.nan, index=pfas.index, columns=pfas.columns)
-        formulas = pd.DataFrame("", index=pfas.index, columns=pfas.columns)
+        features["row_index"] = np.arange(len(features))
+        features["Longitude"] = [120.0, 120.1, 120.2, 120.3]
+        features["Latitude"] = [38.0, 38.1, 38.2, 38.3]
+        primary = PREPROCESSING.importlib.import_module("01_primary_model_training")
         with tempfile.TemporaryDirectory(prefix="pfas-pooled-oof-test-") as directory:
-            output = Path(directory)
+            output = Path(directory) / "outputs"
+            inputs = Path(directory) / "inputs"
+            inputs.mkdir()
+            workbook = inputs / "synthetic_input.xlsx"
+            features.to_excel(workbook, index=False)
             arguments = SimpleNamespace(
+                n_jobs=1,
                 prepare_only=False,
                 analysis_mode="validation",
                 output_dir=output,
-                data=output / "synthetic_input.xlsx",
-                feature_table=output / "synthetic_features.csv",
-                source_load=output / "synthetic_source.csv",
-                boundary=output / "synthetic_boundary.shp",
+                data=workbook,
+                feature_table=inputs / "synthetic_features.csv",
+                source_load=inputs / "synthetic_source.csv",
+                boundary=inputs / "synthetic_boundary.shp",
+                routing_directory=None,
                 reference_report=output / "unused_legacy_report.csv",
                 schemes=["S0_submitted", "S1_half_limit"],
                 validation="sampling_group",
@@ -143,18 +147,14 @@ class PooledOOFTests(unittest.TestCase):
             with (
                 patch.object(PREPROCESSING, "parse_arguments", return_value=arguments),
                 patch.object(
-                    PREPROCESSING.pd, "read_excel", return_value=features.copy()
+                    primary,
+                    "training_input_provenance",
+                    return_value={
+                        "data": {"path": str(workbook), "sha256": primary.sha256(workbook)}
+                    },
                 ),
                 patch.object(
-                    PREPROCESSING.pd, "read_csv", return_value=features.copy()
-                ),
-                patch.object(
-                    PREPROCESSING, "file_sha256", return_value="synthetic-test-only"
-                ),
-                patch.object(
-                    PREPROCESSING,
-                    "reconstruct_pfas_values",
-                    return_value=(reconstructed, statuses, limits, formulas),
+                    primary, "load_features", return_value=features.copy()
                 ),
                 patch.object(
                     PREPROCESSING,

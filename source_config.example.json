@@ -1,0 +1,12 @@
+{
+  "rivers_file": "PATH_TO_INPUTS/100_Rivers_2018.xlsx",
+  "estuary_file": "PATH_TO_INPUTS/estuary.xlsx",
+  "bulletin_file": "PATH_TO_PRODUCTS/China Sediment Bulletin.xlsx",
+  "discharge_directory": "PATH_TO_PRODUCTS/GloFAS_Discharge_China_Coast",
+  "output_directory": "PATH_TO_NEW_SOURCE_OUTPUTS",
+  "start_year": 2014,
+  "end_year": 2025,
+  "base_year": 2018,
+  "seed": 42,
+  "iterations": 1000000
+}

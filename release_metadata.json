@@ -1,25 +1,76 @@
 {
   "release_name": "marine-pfas-analysis-code",
-  "version": "1.1.0",
-  "release_date": "2026-10-09",
-  "previous_public_commit": "e0347a58d535f6bb56cc2a072aaa22b203dcaacd",
-  "historical_metadata": "docs/historical_release_metadata_v1.0.0.json",
-  "scope": "Analysis-only code and fixed numerical inputs/outputs; figure-layout and image-export code excluded",
-  "release_adaptations": [
-    "Sequential public filenames and directories",
-    "Repository-relative data and output paths",
-    "Explicit Monte Carlo seed for future regeneration",
-    "Fixed historical Monte Carlo realization retained as the authoritative downstream input",
-    "Paired inverse transformation and total long-chain burden change retained in analysis code",
-    "Contributor-specific paths removed from public manifests",
-    "Portable existing-output class-response and attribution postprocessing",
-    "Deterministic pooled OOF export on original group-ratio scales",
-    "Three-design compact composition-validation references with historical source provenance",
-    "Mixed-source long-chain ratio diagnostic on the shared perturbation domain"
+  "version": "2.0.0",
+  "release_date": "2026-10-14",
+  "previous_public_commit": "6685c27e34602e4c207d1316d645cbc24c204499",
+  "scope": "Research analysis code, configuration templates, tests and reference inputs. Derived results and raw workbooks are shared separately.",
+  "scientific_changes": [
+    "Updated model-panel compound dictionary and corrected-input preparation",
+    "Full environmental extraction and protected workbook writeback",
+    "Seeded river-source reconstruction and separate provenance records",
+    "Shared land-aware coastal routing with reviewed water anchors",
+    "One explicit-input analysis runner with provenance-checked stage reuse",
+    "Updated grouped validation, paired attenuation and evidence exports",
+    "Portable regional-response and model-sensitivity diagnostics"
   ],
-  "fixed_input_sha256": {
-    "Step3_MonteCarlo_Flux_2018.csv": "7fe3ab1d98e9b43d8e48dc9110a5e4d5955c6f34fd6876457c6ce2d4404463ff",
-    "Step4_Coastline_Source_Load_2018.csv": "38b168027580a0469922fa90ac76030e93621ffd3c76e7c8509f7b55f23617c3",
-    "Long_Chain_Model_Feature_Table.csv": "0057c51827e31e01745ffec19141b48ccd1c2f1332df8219b40a2fc3a7be267d"
+  "historical_results": {
+    "commit": "6685c27e34602e4c207d1316d645cbc24c204499",
+    "policy": "The preceding fixed inputs and outputs remain in Git history; they are not inputs to the current release."
+  },
+  "core_source_sha256": {
+    "code/01_data_preparation/01_environmental_covariates/01_marine_physicochemical_interpolation.py": "6da1ab766026c6503c6f92e647c281be07883ce5f683020ff8adcb127df05d6b",
+    "code/01_data_preparation/01_environmental_covariates/02_chlorophyll_a_extraction.py": "20de812310e2e794ebc01f766067fad237c052dce2d5186fb5a96682c1b8046a",
+    "code/01_data_preparation/01_environmental_covariates/03_particulate_organic_carbon_extraction.py": "a98224784857304bfe435d5d9b7b8f015bc1beaf8600f780d7d55adc637666d3",
+    "code/01_data_preparation/01_environmental_covariates/04_suspended_particulate_matter_extraction.py": "1f56f22997dea0a5babff5932bfdde7ec21a3e9f662cd5bf5d694ea87909d300",
+    "code/01_data_preparation/01_environmental_covariates/05_dissolved_oxygen_extraction.py": "e00eeab8d8833328a0d612118b057a7255e0504dfd5bad8093d830e324529cc9",
+    "code/01_data_preparation/01_environmental_covariates/06_sediment_toc_interpolation.py": "4d89fd548df1b2e1906ea34d382491f85af475452630550f3908b6908b6912ce",
+    "code/01_data_preparation/01_environmental_covariates/07_hydrodynamic_extraction.py": "d601ab8930df0378b3a419554e63154d8142bec7d492ac84116227e8943c187b",
+    "code/01_data_preparation/01_environmental_covariates/environment_core.py": "cda863d98e9cab74ec0e2d8d4d7e1cc3fbf024b85bcdbac78420f3730140b755",
+    "code/01_data_preparation/01_environmental_covariates/run_environment.py": "1f911dff8b2c44ab7d9986481d4c69cb24168e84310e6e958cc546043ebe7fc0",
+    "code/01_data_preparation/01_environmental_covariates/workbook_update.py": "eecd587a1739430825a3c1bdb40091a12ab59825f8fd3689c1a7dd81e253eb8b",
+    "code/01_data_preparation/02_source_covariates/01_glofas_discharge_extraction.py": "05b7b26b90d52eb3af2b4e600162d7de35e351b46e5bf204234f93d583e6460a",
+    "code/01_data_preparation/02_source_covariates/02_river_fingerprint_construction.py": "9ad25d01b4a70f01012fd11204b1de4c23b1bec776a83438e6471b6e5e4ee85e",
+    "code/01_data_preparation/02_source_covariates/03_monte_carlo_river_flux.py": "a0aabe5ec1b75591e15f3333820ed27a5ee6fe4f15137eb990f5126b07f3c2ec",
+    "code/01_data_preparation/02_source_covariates/04_coastline_source_descriptors.py": "aedf868487278ef244e15cbbeefa8b925383f94b6b440a47d768eac58bc673bd",
+    "code/01_data_preparation/02_source_covariates/run_sources.py": "431ffa101573f889c553c560ed66538434dd3d463e27bf933c29459ee4884fd5",
+    "code/01_data_preparation/02_source_covariates/source_common.py": "31d403282b8a38080d655681bdea132e3cae7ddcd9e08df0c2ab5a4c396b6c07",
+    "code/02_modeling_and_validation/01_primary_model_training.py": "2b80fe360a06c8a54ef75e8cb4c2b6bb33ed4a0da6a826533cf052a339c6d0fe",
+    "code/02_modeling_and_validation/02_source_attenuation_boundary.py": "f95a5091edcaaa1ec706f1e682c7b4cf3133c83b046455007dcf28ba0e57c2df",
+    "code/02_modeling_and_validation/03_source_attenuation_inference.py": "334828139d12a622d81940c5849d314faa26a283af57a9e1da98e3520046637c",
+    "code/02_modeling_and_validation/04_preprocessing_sensitivity.py": "bb00da64478f439dc3e1d51726bd1336e1fd618cf0f11f3c625dba99404dd368",
+    "code/02_modeling_and_validation/05_compositional_validation.py": "b2345061bce9d18a34bfee925a879b1708af647ddc97138f20ced890d0698c5f",
+    "code/02_modeling_and_validation/06_magnitude_balance_validation.py": "e2368ebd39710b55ffa0858b3b9a4cbeb6022c04ddc2286d7391a593db0fa6ad",
+    "code/02_modeling_and_validation/_source_attenuation_core.py": "1260963433bfb41add0bec0a099c03d0958c136a9dc7529655c5e3fe4fd36f21",
+    "code/02_modeling_and_validation/config/coastal_routing.json": "c1d6a172e052771a13755c4dd3db249678bb0feba352a1fe806ab55c3d2f3a7a",
+    "code/02_modeling_and_validation/config/source_attenuation.json": "08cecfdf60af8e303b3b3906751d00666a0b510249c58685398d77feeec0c26c",
+    "code/02_modeling_and_validation/metadata_schema.py": "c4eecc75c436cf29a8ede1f9a9a80df921d8ddf81e670447df2aa292102b3b52",
+    "code/03_evidence_strengthening/evidence_contract.py": "47caee2f658fd41a41cd14bf23effe1eb572f68cf9ab0180a7e7f0f547aec9d3",
+    "code/03_evidence_strengthening/README.md": "4a5412b5d9e5617328155a81d70b3c6ad413b69532ac82ec42be68164cd36338",
+    "code/03_evidence_strengthening/source_ratio_diagnostic.py": "6870a50d0a29971a8306a92491655e774414e714ca42614fad82bb3bce7059c8",
+    "code/03_evidence_strengthening/wr_evidence_strengthening.py": "a1772b55077f8c5dd1941ed9f75c450873d939ad579ffff450d87dbc66d4ac67",
+    "code/03_evidence_strengthening/wr_response_regimes.py": "5ab3a705f935d74206c478b0def63476e825f722a0ba7041b41efcb921895d1e",
+    "code/coastal_routing.py": "2aa46e439fdc3dd897566d6c2e7471eef8bfca0035bfa424225ca714cc741da6",
+    "code/pfas_schema.py": "32badd424ed57b703a18ec4156b50422d070557efb1066934b9ed8ac4bdb53a4",
+    "run_analysis.py": "ee4f57a71650bcd9ee76d484044c9af14497a301971d76e94ac11d5968ae12dd",
+    "analysis_config.example.json": "43f951fc3949b79c45e1fc4676a377fc0336e69d9679dc270ce845d5f5853fbf",
+    "requirements.txt": "82eefc7e22c7fe37c6edae4a424206e911316068d79812799a69d77aeec9c6dc"
+  },
+  "source_inventory_sha256": {
+    "Step3_MonteCarlo_Flux_2018.csv": "6032e34a3749e6ef67439ec2732f6d7900a9a84d9a7c7784db5fabd561a82972",
+    "Step4_Coastline_Source_Load_2018.csv": "103907aaf5a60aeeff41d8075d62412191d2f908e630f80459e470ae65ff9434"
+  },
+  "data_workbook_sha256": "fc44d0d550f3bff7c75e8a8149337fcf1baa31485d1b866caba12c4d9899ed95",
+  "frozen_model_sha256": "cfb296d1f6cfde08ab1d201576fc45740fbca8f5db62b29b89c75c56a46ec611",
+  "production_run": {
+    "eligible_observations": 751,
+    "sampling_groups": 22,
+    "stages_completed": 11,
+    "common_scenario_observations": 606,
+    "common_scenario_sampling_groups": 18
+  },
+  "license": "Unchanged; no new license assigned",
+  "additional_scientific_code_sha256": {
+    "code/03_evidence_strengthening/regional_selectivity_analysis.py": "94191eabbfa92a181893fb8d36eb3efd6f01bd3e338e776b96e95e623f5c9e8f",
+    "code/03_evidence_strengthening/validate_regional_reference.py": "9c03225573bdfa4e37abbf329db655b8370c9d8ca3c08b324e1fe47e3e1fe883"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "workbook": "PATH_TO_ORIGINAL_DATA/DATA.xlsx",
+  "sheet": "Spatiotemporal identification",
+  "toc_reference": "PATH_TO_ORIGINAL_DATA/Sediment TOC_metadata.xlsx",
+  "provider_root": "PATH_TO_EXISTING_PRODUCT_ROOT",
+  "physical_file": "cmems_mod_glo_phy_my_0.083deg_P1M-m_1767061731823.nc",
+  "ph_file": "cmems_mod_glo_bgc_my_0.25deg_P1M-m_1766974042700.nc",
+  "output_directory": "PATH_TO_NEW_RUN_OUTPUT"
+}

@@ -1,159 +1,143 @@
 # Marine PFAS analysis code
 
-Analysis code and fixed numerical inputs for examining marine PFAS concentration magnitude and PFSA–PFCA composition under source attenuation in China's marginal seas.
+Version 2.0.0 reconstructs environmental and river-source covariates, fits marine
+PFAS concentration and composition models, and evaluates source-attenuation
+scenarios across China's marginal seas. The release includes research analysis
+code, configuration templates, tests and reference inputs. Figure-layout and
+image-export code are maintained separately.
 
-This repository reproduces data preparation, model validation, source-boundary perturbation and numerical results. It intentionally excludes figure-layout and image-export code. Figures are presentation products; the calculations underlying their values are performed and exported by the analysis scripts included here.
+This version uses the corrected observation compilation and shared coastal
+routing. The verified primary run contains 751 eligible observations from
+22 sampling groups. The common comparison population across the specified
+attenuation paths contains 606 observations from 18 groups. These counts are
+properties of that run; the scripts calculate counts from supplied inputs.
 
-## Analysis update
+## Version and data provenance
 
-This revision extends the reproducible analysis at commit
-`e0347a58d535f6bb56cc2a072aaa22b203dcaacd` with fixed-model evidence
-post-processing, pooled sensitivity exports and compact numerical references.
-The historical execution manifests are retained with their original identities;
-new calculations have separate provenance records. The primary RF/XGB models,
-historical Monte Carlo inputs and reported numerical results are unchanged.
+The previous public version is commit
+`6685c27e34602e4c207d1316d645cbc24c204499` (v1.1.0). Its fixed numerical inputs
+and outputs remain available in Git history. They are not current-release
+defaults. Corrected source and model products are provided through the separate
+research-data package or regenerated using the commands below.
 
-## Repository structure
+`release_metadata.json` identifies the corrected input hashes, scientific-code
+hashes and preceding version. `docs/release_validation_v2_0_0.json` records the
+verification scope. No raw Excel workbook or large provider product is included
+in this repository. The data-access information is maintained in `data/README.md`.
 
-```text
-code/
-  01_data_preparation/
-    01_environmental_covariates/
-    02_source_covariates/
-  02_modeling_and_validation/
-  03_evidence_strengthening/
-data/
-  fixed_inputs/
-  reference/
-  fixed_outputs/
-  raw/                    # author-shared raw inputs; not duplicated here
-docs/
-tests/
+## Installation
+
+The verified scientific runtime is Python 3.13.7. Install the pinned dependencies:
+
+```sh
+python -m pip install -r requirements.txt
 ```
 
-## Analysis order
+The environmental extraction modules additionally use the dependencies listed
+in `requirements_environment.txt`. Provider credentials remain local.
 
-### 1. Upstream covariates
+## 1. Environmental covariates
 
-The scripts in `code/01_data_preparation/` document the environmental and river-source reconstruction. Large third-party satellite products are not redistributed. The exact historical source realization used by the manuscript is fixed under `data/fixed_inputs/source_boundary/`.
+Set the corrected observation workbook, TOC reference and provider-product paths
+in a copy of `environment_config.example.json`. Run from the repository root:
 
-### 2. Primary model
-
-```bash
-python code/02_modeling_and_validation/01_primary_model_training.py
+```sh
+python code/01_data_preparation/01_environmental_covariates/run_environment.py --config environment_config.local.json
 ```
 
-The default input is the metadata-harmonized feature table used for the reported RF/XGB analysis. Default outputs are written to `outputs/01_primary_model/`. The script generates nested out-of-fold performance, reconstructed long-chain outputs, feature-block ablation, SHAP attribution, predictor provenance and the fitted model package.
+This stages temperature, salinity, pH, Chl-a, POC, SPM, DO, sediment TOC, bottom
+currents and mixed-layer depth, with per-record provenance. Source-reported
+values are retained. A verified, backed-up workbook update is available through
+`--writeback`. `--resume` reuses a checkpoint only when inputs, settings and code
+match.
 
-### 3. Source-attenuation boundary
+## 2. River and coastal-source covariates
 
-```bash
-python code/02_modeling_and_validation/02_source_attenuation_boundary.py --overwrite
+Set river/estuary workbooks, discharge products, output directory and sampling
+settings in a copy of `source_config.example.json`:
+
+```sh
+python code/01_data_preparation/02_source_covariates/run_sources.py --config source_config.local.json
 ```
 
-This applies the prespecified literature-derived class multipliers to the fixed 2018 compound inventory. Perturbation intensity is dimensionless and does not represent a date, probability or forecast horizon.
+The sequence exports annual discharge, regional concentration profiles,
+compound-resolved fluxes and coastline source descriptors. The current source
+reconstruction uses seed 42 and 1,000,000 Monte Carlo draws per region. It is
+identified separately from the preceding unseeded historical realization.
+Each source and its compound fluxes remain identifiable after routing.
 
-### 4. Paired source-attenuation inference
+## 3. Primary analysis and validation
 
-```bash
-python code/02_modeling_and_validation/03_source_attenuation_inference.py \
-  --model-package data/fixed_outputs/primary_model/Long_Chain_Magnitude_Balance_Model_Package.pkl \
-  --scenario-directory outputs/02_source_attenuation_boundary \
-  --overwrite
+Set corrected input and reference paths in a copy of
+`analysis_config.example.json`. Paths in this file resolve relative to the
+configuration file. The complete analysis runs in an isolated output directory:
+
+```sh
+python run_analysis.py --config analysis_config.local.json --output-dir outputs/analysis --mode production --n-jobs 8
 ```
 
-This script fixes environmental covariates, routes the altered source boundary, predicts Magnitude and Balance, performs the paired inverse transformation to total long-chain PFAS burden, calculates sampling-group-cluster bootstrap intervals and audits the supported perturbation domain. The burden percentages reported in the abstract and Fig. 4 are therefore generated in the analysis code, not in a plotting script.
+The runner performs 11 stages in dependency order:
 
-### 5. Sensitivity and coordinate validation
+1. Shared land-aware coastal routing and frozen attachment distances.
+2. Observation metadata, source features and PFAS group targets.
+3. Grouped/spatial model selection, validation and OOF SHAP.
+4. Compound-resolved source-attenuation boundary construction.
+5. Paired scenario predictions and inverse concentration transformation.
+6. Left-censoring and preprocessing sensitivity.
+7. Compositional validation.
+8. Magnitude-Balance representation validation.
+9. Regional class-response and environmental attribution summaries.
+10. Within-group attribution contrasts.
+11. Mixed-source composition diagnostics.
 
-```bash
-python code/02_modeling_and_validation/04_preprocessing_sensitivity.py --analysis-mode validation
-python code/02_modeling_and_validation/05_compositional_validation.py
-python code/02_modeling_and_validation/06_magnitude_balance_validation.py
+Existing completed stages are reused only when code, inputs and product hashes
+match. Use a fresh output directory when the generation changes. `--mode smoke`
+tests software integration with reduced settings; its estimates are not
+publication results.
+
+The PFAS dictionaries distinguish the full concentration compilation from the
+19-compound model panel and the compound-resolved river inventory. Precursor or
+replacement measurements in a compilation are not automatically added to the
+Magnitude-Balance model groups.
+
+Source routing uses the same frozen graph and attachments in training,
+validation and scenario inference. Reviewed receiving-water anchors, land
+barriers, source-preservation checks and provenance are defined in
+`code/02_modeling_and_validation/config/coastal_routing.json`.
+
+## 4. Regional-response diagnostics
+
+After the production analysis, run the supplementary diagnostic stages:
+
+```sh
+python code/03_evidence_strengthening/regional_selectivity_analysis.py prepare --code-root code --production-root outputs/analysis --output-root outputs/regional_selectivity
+python code/03_evidence_strengthening/regional_selectivity_analysis.py stability --code-root code --production-root outputs/analysis --output-root outputs/regional_selectivity
+python code/03_evidence_strengthening/regional_selectivity_analysis.py interactions --code-root code --production-root outputs/analysis --output-root outputs/regional_selectivity
 ```
 
-The first command requires `data/raw/DATA.xlsx` because it reconstructs censoring
-treatments from the workbook. The compositional-validation command (05) also
-requires that workbook to reconstruct its group targets and supplements its
-predictors from the fixed model feature table. Only command 06 can use the fixed
-feature table without first reading the raw workbook.
+The calculations retain the original compound-source transformations and
+environmental settings. Outputs include dense attenuation paths, an alternative
+group-tuned XGBoost composition model, training-group deletion refits, paired
+Tree SHAP interaction contributions and cross-group feature-distance summaries.
+The production model is preserved. Seeds, the evaluated population and input
+hashes are recorded in separate provenance files. No figure or document is
+generated by these commands.
 
-Command 04 now additionally writes `Sensitivity_Pooled_OOF_Performance.csv`
-from its already generated held-out predictions. This evaluates original,
-untransformed group ratios and is distinct from the existing per-fold mean
-summary in `Sensitivity_Performance_Summary.csv`; neither summary replaces the
-other. The pooled export does not refit or modify observations or predictions.
+See `code/03_evidence_strengthening/regional_selectivity_README.txt` for exact
+stage requirements, resume behaviour and diagnostic interpretation.
 
-### 6. Existing-output evidence post-processing
+## Reproducibility
 
-```bash
-python code/03_evidence_strengthening/wr_evidence_strengthening.py \
-  --scenario-input outputs/03_source_attenuation_inference/Scenario_Paired_Predictions.csv \
-  --shap-input outputs/01_primary_model/Nested_OOF_SHAP_Values.csv
-python code/03_evidence_strengthening/wr_response_regimes.py
-python code/03_evidence_strengthening/source_ratio_diagnostic.py
-```
-
-The historical `wr_` script names are retained for traceability. The first two
-scripts reproduce fixed-common-domain
-regional class responses and within-sampling-group TOC/mixed-layer-depth
-quartile attribution contrasts, with the original 10,000-resample bootstrap
-sequence. Exploratory knot diagnostics remain explicitly separate from the
-reported contrasts and are not interpreted as physical thresholds.
-
-The third script summarizes mixed-source long-chain PFSA/PFCA descriptors from
-the existing paired feature exports. Its common domain requires all four source
-features to remain within training minima/maxima in both designs at 10%, 25%
-and 50% path positions. Fixed source-node ratios do not imply fixed mixed-source
-descriptors, because attenuation can change relative total-load weights. The
-diagnostic is not an isolated test of environmental causality or sediment flux.
-
-The compact reference package does not contain the large, complete paired
-prediction and OOF SHAP files. Use existing archived files through the explicit
-input arguments, or first generate them with commands 01/03. None of the new
-post-processing scripts silently retrains a model or recalculates SHAP when
-inputs are missing. See `code/03_evidence_strengthening/README.md` for individual
-inputs, outputs and provenance.
-
-## Path configuration
-
-No contributor-specific absolute paths are embedded in the release. Scripts resolve paths from the repository root and accept:
-
-- `PFAS_PROJECT_ROOT` — repository root;
-- `PFAS_DATA_ROOT` — data directory, default `<project>/data`;
-- `PFAS_OUTPUT_ROOT` — generated-output directory, default `<project>/outputs`.
-
-Raw workbooks and provider-specific files should be placed under `data/raw/` using the names in `data/README.md`.
-
-## Fixed historical Monte Carlo realization
-
-The manuscript's river-flux reconstruction used 1,000 Monte Carlo draws per source node, but the original run did not record a seed. A seed was not assigned retroactively. The exact downstream inputs are archived:
-
-- `Step3_MonteCarlo_Flux_2018.csv`: SHA-256 `7fe3ab1d98e9b43d8e48dc9110a5e4d5955c6f34fd6876457c6ce2d4404463ff`;
-- `Step4_Coastline_Source_Load_2018.csv`: SHA-256 `38b168027580a0469922fa90ac76030e93621ffd3c76e7c8509f7b55f23617c3`.
-
-`03_monte_carlo_river_flux.py` now uses `numpy.random.default_rng`, exposes `--seed` (default 42) and records input/output hashes. Seeded reruns test reproducibility but do not replace the fixed historical realization used in the manuscript.
-
-## Fixed outputs
-
-`data/fixed_outputs/` contains compact reference outputs for numerical cross-checking, including model performance, feature-block/SHAP summaries, source-transition products, the back-transformed burden summary and validation summaries. It does not contain submission figures or figure-export code.
-
-The new `Compositional_AllDesigns_Canonical_*` tables recover three-design
-canonical figure-source summaries without relabeling the original spatial-only
-execution manifest. Their source manifest states precision and field-coverage
-boundaries. The `evidence_strengthening/` compact tables retain the reported
-regional and attribution-contrast results and identify which rows support the
-manuscript figure, rather than treating every exploratory result as a reported
-finding.
-
-## Verification
-
-```bash
+```sh
 python -m unittest discover -s tests -v
 ```
 
-The release tests compile every Python file, verify the fixed-input hashes, deterministically rebuild Step 4 from the fixed Step 3 inventory, resolve the source-transition evidence files and reject contributor-specific paths.
+Tests use controlled fixtures to exercise schema, source aggregation, protected
+workbook updates, routing barriers, scenario transformations, model interfaces
+and execution provenance. The completed production run is independently checked
+against its frozen inputs and products. Full production execution requires the
+author-shared workbooks and specified third-party data.
 
-`SHA256SUMS.txt` is the package-level integrity manifest. See `docs/filename_crosswalk.md` for the analysis workflow and file roles.
-
-No license is assigned in this package. The repository owner should select a license before public reuse. Add the immutable GitHub release/archival DOI to the manuscript Code Availability statement only after deposition.
+`SHA256SUMS.txt` provides the release-file integrity manifest. Details belong in
+the accompanying research documentation rather than conversational code comments.
+The preceding licensing status is retained; no new licence is assigned here.

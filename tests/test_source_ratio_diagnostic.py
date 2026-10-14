@@ -23,6 +23,7 @@ class SourceRatioDiagnosticTests(unittest.TestCase):
                 {
                     "scenario_id": scenario,
                     "row_index": row,
+                    "Sampling_Group": f"synthetic-group-{row}",
                     "Sea_Region": "Bohai Sea" if row == 0 else "South China Sea",
                     "outside_source_minmax_any": False,
                     "Long_Balance_delta": 0.8 if row == 0 else -0.4,

@@ -1,0 +1,8 @@
+{
+  "data": "data/raw/DATA.xlsx",
+  "source_load": "outputs/source_preparation/Step4_Coastline_Source_Load_2018.csv",
+  "compound_inventory": "outputs/source_preparation/Step3_MonteCarlo_Flux_2018.csv",
+  "boundary": "data/reference/geospatial/china_coastline_boundary.shp",
+  "scenario_config": "code/02_modeling_and_validation/config/source_attenuation.json",
+  "routing_config": "code/02_modeling_and_validation/config/coastal_routing.json"
+}

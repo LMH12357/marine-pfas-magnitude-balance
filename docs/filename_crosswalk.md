@@ -1,5 +1,10 @@
 # Analysis workflow and file roles
 
+Version 2.0.0 adds the shared `code/pfas_schema.py`, `code/coastal_routing.py`,
+upstream `run_environment.py` and `run_sources.py`, and root `run_analysis.py`.
+The separate `regional_selectivity_analysis.py` diagnostic consumes completed
+production products. The table below retains the sequential workflow names.
+
 | Release path | Role |
 |---|---|
 | `code/01_data_preparation/01_environmental_covariates/01_marine_physicochemical_interpolation.py` | Interpolates marine physicochemical covariates. |

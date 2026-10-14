@@ -1,5 +1,9 @@
 # Reproducibility audit (28 August 2026)
 
+Historical record for the pre-v2 analysis. Its paths and numerical products
+refer to the preceding Git history, not current inputs. Current verification is
+recorded in `release_validation_v2_0_0.json`.
+
 ## Historical Monte Carlo output
 
 The source reconstruction used 1,000 Monte Carlo draws per source node, but the original run did not record a random seed. A seed was therefore not assigned retroactively and the source inventory used in the analysis was not regenerated.
